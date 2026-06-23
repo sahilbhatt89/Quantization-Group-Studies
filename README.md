@@ -1,12 +1,21 @@
 # Quantization Group Studies
 
-This project studies post-training quantization using an already pretrained ResNet-18 model.
+This project studies post-training quantization using pretrained TensorFlow/Keras models.
+
+The current implementation starts with a pretrained ResNet-18 model. The full project scope includes both weight quantization and activation quantization, with M/M reduction and compression reported separately for model weights and intermediate activations.
+
+See the detailed scope document:
+
+- [Project scope](docs/project_scope.md)
 
 ## Project Steps
 
 1. Load a pretrained ResNet-18 model.
-2. Apply post-training quantization and evaluate the result.
-3. Implement a custom PTQ method and compare the result.
+2. Measure FP32 baseline weight and activation memory.
+3. Apply built-in TensorFlow/TFLite PTQ as a learning baseline.
+4. Implement custom 8-bit weight quantization.
+5. Implement custom 8-bit activation quantization.
+6. Compare M/M reduction and compression for weights and activations.
 
 ## Setup
 
@@ -36,3 +45,32 @@ This project uses the KerasHub `resnet_18_imagenet` preset:
 - Preset: `resnet_18_imagenet`
 
 The first run may download the ImageNet pretrained weights through KerasHub.
+
+## Built-In PTQ Baseline
+
+Convert ResNet-18 to an unquantized TFLite baseline, dynamic-range INT8, and
+full INT8 weights/activations:
+
+```bash
+python3 scripts/benchmark_builtin_ptq_resnet18.py
+```
+
+The script uses images in `data/` for full INT8 activation calibration and
+writes generated models and `results.json` under
+`artifacts/resnet18_builtin_ptq/`.
+
+The report includes:
+
+- Serialized model size and compression
+- Constant weight-buffer memory and compression
+- Intermediate activation tensor-storage estimate and compression
+- Mean, median, and standard-deviation inference latency
+- Input/output and intermediate tensor data types
+
+The activation value is the sum of nonconstant tensor sizes represented in the
+TFLite graph. It is useful for a consistent comparison, but it is not the exact
+peak interpreter arena memory because the runtime may reuse tensor buffers.
+
+For meaningful calibration, place approximately 50-200 representative images
+in `data/`. The current sample image is sufficient only for a conversion smoke
+test.

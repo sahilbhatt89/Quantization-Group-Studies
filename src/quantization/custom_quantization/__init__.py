@@ -1,12 +1,6 @@
-"""Built-in and custom quantization utilities."""
+"""Custom post-training quantization utilities."""
 
-from .builtin_ptq import (
-    build_fixed_input_model,
-    convert_dynamic_range,
-    convert_float,
-    convert_full_integer,
-)
-from .custom_quantization import (
+from .custom_ptq import (
     ActivationQuantizationResult,
     QuantizedTensor,
     WeightQuantizationResult,
@@ -19,11 +13,7 @@ __all__ = [
     "ActivationQuantizationResult",
     "QuantizedTensor",
     "WeightQuantizationResult",
-    "build_fixed_input_model",
     "calibrate_activation_ranges",
-    "convert_dynamic_range",
-    "convert_float",
-    "convert_full_integer",
     "custom_ptq",
     "quantize_weights_symmetric_int8",
 ]
