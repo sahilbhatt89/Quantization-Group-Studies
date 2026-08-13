@@ -1,4 +1,4 @@
-"""Convert and benchmark built-in TFLite PTQ variants of ResNet-18."""
+"""Convert and measure built-in TFLite PTQ variants of ResNet-18."""
 
 from __future__ import annotations
 
@@ -14,8 +14,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.evaluation import (
-    benchmark_tflite,
     inspect_tflite,
+    predict_tflite,
     reduction_metrics,
     size_metrics,
 )
@@ -45,7 +45,6 @@ def parse_args() -> argparse.Namespace:
         default=PROJECT_ROOT / "artifacts" / "resnet18_builtin_ptq",
         help="Directory for converted models and results.",
     )
-    parser.add_argument("--runs", type=int, default=30)
     return parser.parse_args()
 
 
@@ -114,7 +113,7 @@ def main() -> None:
     for name, path in paths.items():
         metrics = {
             **inspect_tflite(path),
-            **benchmark_tflite(path, samples[0], measured_runs=args.runs),
+            **predict_tflite(path, samples[0]),
         }
         if name == "float32":
             size_bytes = path.stat().st_size
@@ -132,9 +131,6 @@ def main() -> None:
 
     baseline = results["float32"]
     for metrics in results.values():
-        metrics["latency_speedup"] = (
-            baseline["mean_latency_ms"] / metrics["mean_latency_ms"]
-        )
         metrics["weight_memory"] = {
             "size_bytes": metrics["weight_storage_bytes"],
             **reduction_metrics(
@@ -160,8 +156,7 @@ def main() -> None:
             f"{name:>12}: {metrics['size_mib']:.2f} MiB, "
             f"{metrics['compression_ratio']:.2f}x compression, "
             f"{metrics['memory_reduction_percent']:.2f}% reduction, "
-            f"{metrics['mean_latency_ms']:.2f} ms mean latency, "
-            f"{metrics['latency_speedup']:.2f}x speedup"
+            f"top class {metrics['top_class_index']}"
         )
         print(
             f"{'':>14}weight reduction "

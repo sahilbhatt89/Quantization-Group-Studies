@@ -1,6 +1,6 @@
 """Built-in and custom quantization utilities."""
 
-from .builtin_ptq import (
+from .inbuilt_quantization import (
     build_fixed_input_model,
     convert_dynamic_range,
     convert_float,

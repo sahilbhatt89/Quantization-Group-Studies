@@ -49,7 +49,7 @@ The first run may download the ImageNet pretrained weights through KerasHub.
 ## Built-In PTQ Baseline
 
 Convert ResNet-18 to an unquantized TFLite baseline, dynamic-range INT8, and
-full INT8 weights/activations:
+full INT8 weights/activations/input/output:
 
 ```bash
 python3 scripts/benchmark_builtin_ptq_resnet18.py
@@ -64,7 +64,6 @@ The report includes:
 - Serialized model size and compression
 - Constant weight-buffer memory and compression
 - Intermediate activation tensor-storage estimate and compression
-- Mean, median, and standard-deviation inference latency
 - Input/output and intermediate tensor data types
 
 The activation value is the sum of nonconstant tensor sizes represented in the

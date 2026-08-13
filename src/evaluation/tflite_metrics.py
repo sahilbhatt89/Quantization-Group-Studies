@@ -1,8 +1,7 @@
-"""Size, tensor-type, and latency metrics for TFLite models."""
+"""Size, tensor-type, storage, and prediction metrics for TFLite models."""
 
 from __future__ import annotations
 
-import time
 from collections import Counter
 from pathlib import Path
 
@@ -50,13 +49,11 @@ def inspect_tflite(model_path: Path) -> dict[str, object]:
     }
 
 
-def benchmark_tflite(
+def predict_tflite(
     model_path: Path,
     sample: np.ndarray,
-    warmup_runs: int = 5,
-    measured_runs: int = 30,
 ) -> dict[str, float | int]:
-    """Measure single-sample TFLite inference latency."""
+    """Run single-sample TFLite inference and report the top class."""
     interpreter = tf.lite.Interpreter(model_path=str(model_path))
     input_detail = interpreter.get_input_details()[0]
 
@@ -68,23 +65,10 @@ def benchmark_tflite(
     output_detail = interpreter.get_output_details()[0]
     model_input = _quantize_input(sample, input_detail)
 
-    for _ in range(warmup_runs):
-        interpreter.set_tensor(input_detail["index"], model_input)
-        interpreter.invoke()
-
-    times_ms = []
-    for _ in range(measured_runs):
-        interpreter.set_tensor(input_detail["index"], model_input)
-        start = time.perf_counter()
-        interpreter.invoke()
-        times_ms.append((time.perf_counter() - start) * 1000)
-
+    interpreter.set_tensor(input_detail["index"], model_input)
+    interpreter.invoke()
     output = interpreter.get_tensor(output_detail["index"])
     return {
-        "runs": measured_runs,
-        "mean_latency_ms": float(np.mean(times_ms)),
-        "median_latency_ms": float(np.median(times_ms)),
-        "std_latency_ms": float(np.std(times_ms)),
         "top_class_index": int(np.argmax(output[0])),
     }
 

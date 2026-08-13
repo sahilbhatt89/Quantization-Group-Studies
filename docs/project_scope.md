@@ -1,22 +1,12 @@
 # Project Scope
 
-## Architecture-Aware Quantization Study
+## CNN Quantization Study
 
-This project studies post-training quantization across pretrained neural network architectures using TensorFlow/Keras.
-
-The final study compares quantization behavior across three model families:
-
-1. CNN-based image classification models
-2. Vision Transformer-based image classification models
-3. NLP Transformer-based text classification models
-
-The planned final scope is 9 pretrained models total:
-
-- 3 CNN/image models
-- 3 Vision Transformer models
-- 3 NLP Transformer models
+This project studies post-training quantization for pretrained CNN image-classification models using TensorFlow/Keras.
 
 The current implementation starts with a pretrained ResNet-18 model as the first CNN baseline.
+
+Additional CNN image-classification models can be added later using the same evaluation structure.
 
 ## Quantization Scope
 
@@ -47,7 +37,7 @@ The project reports two final criteria separately for weights and intermediate a
 1. M/M reduction
 2. Compression
 
-Accuracy, F1-score, latency, and throughput may be used as sanity checks, but they are not the final output criteria.
+Accuracy and F1-score may be used as sanity checks, but they are not the final output criteria.
 
 ## Metrics
 

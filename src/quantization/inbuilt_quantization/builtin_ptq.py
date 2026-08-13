@@ -39,9 +39,11 @@ def convert_full_integer(
     model: keras.Model,
     representative_dataset: RepresentativeDataset,
 ) -> bytes:
-    """Quantize weights and intermediate activations to INT8."""
+    """Quantize weights, activations, model input, and model output to INT8."""
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
     converter.representative_dataset = representative_dataset
     converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+    converter.inference_input_type = tf.int8
+    converter.inference_output_type = tf.int8
     return converter.convert()

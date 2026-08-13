@@ -1,6 +1,6 @@
-"""Model definitions."""
+"""CNN-based pretrained model loaders."""
 
-from .cnn_based import (
+from .pretrained_resnet18 import (
     CIFAR10_CLASS_NAMES,
     RESNET18_IMAGENET_PRESET,
     build_resnet18_cifar10_classifier,

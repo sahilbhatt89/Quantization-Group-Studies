@@ -1,15 +1,15 @@
-"""Model evaluation and benchmarking utilities."""
+"""Model evaluation utilities."""
 
 from .tflite_metrics import (
-    benchmark_tflite,
     inspect_tflite,
+    predict_tflite,
     reduction_metrics,
     size_metrics,
 )
 
 __all__ = [
-    "benchmark_tflite",
     "inspect_tflite",
+    "predict_tflite",
     "reduction_metrics",
     "size_metrics",
 ]
