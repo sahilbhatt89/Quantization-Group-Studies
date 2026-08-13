@@ -73,3 +73,17 @@ peak interpreter arena memory because the runtime may reuse tensor buffers.
 For meaningful calibration, place approximately 50-200 representative images
 in `data/`. The current sample image is sufficient only for a conversion smoke
 test.
+
+## DistilBERT PTQ on SST-2
+
+The DistilBERT investigation loads the KerasHub
+`distil_bert_base_en_uncased` pretrained weights, fine-tunes and caches an
+SST-2 sentiment classifier, then compares the FP32 model with built-in TFLite
+dynamic-range PTQ and custom per-channel INT8 weight PTQ:
+
+```text
+notebooks/09_compare_distilbert_sst2_ptq.ipynb
+```
+
+The notebook downloads SST-2 on its first run and reports prediction accuracy,
+parameter ranks, quantized tensor/value counts, and parameter-memory reduction.
