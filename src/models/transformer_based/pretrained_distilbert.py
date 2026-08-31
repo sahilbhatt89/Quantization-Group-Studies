@@ -22,13 +22,7 @@ def build_distilbert_text_classifier(
     num_classes: int = 2,
     freeze_backbone: bool = False,
 ) -> keras.Model:
-    """Build a classifier using the existing pretrained DistilBERT weights.
-
-    The pretrained backbone is retained and a new task-specific classification
-    head is attached. Inputs must already be tokenized dictionaries containing
-    ``token_ids`` and ``padding_mask``; text preprocessing intentionally stays
-    outside the model that will later be converted and quantized.
-    """
+    
     backbone = load_pretrained_distilbert_backbone()
     backbone.trainable = not freeze_backbone
     return keras_hub.models.DistilBertTextClassifier(

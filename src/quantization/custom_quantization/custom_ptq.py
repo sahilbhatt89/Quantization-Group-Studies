@@ -8,6 +8,7 @@ The goal is to keep the quantization math visible for the project study.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Collection
 
 import numpy as np
 import tensorflow as tf
@@ -71,6 +72,7 @@ def custom_ptq(
     representative_samples: list[np.ndarray] | None = None,
     quantize_min_rank: int = 2,
     per_channel: bool = True,
+    included_tensor_names: Collection[str] | None = None,
 ) -> dict[str, WeightQuantizationResult | ActivationQuantizationResult]:
     """Run the custom PTQ pipeline.
 
@@ -83,6 +85,7 @@ def custom_ptq(
             model,
             quantize_min_rank=quantize_min_rank,
             per_channel=per_channel,
+            included_tensor_names=included_tensor_names,
         ),
     }
 
@@ -101,6 +104,7 @@ def custom_ptq_n_bits(
     representative_samples: list[np.ndarray] | None = None,
     quantize_min_rank: int = 2,
     per_channel: bool = True,
+    included_tensor_names: Collection[str] | None = None,
 ) -> dict[str, WeightQuantizationResult | ActivationQuantizationResult]:
     """Run the custom PTQ pipeline for a selected integer bit width.
 
@@ -115,6 +119,7 @@ def custom_ptq_n_bits(
             num_bits=num_bits,
             quantize_min_rank=quantize_min_rank,
             per_channel=per_channel,
+            included_tensor_names=included_tensor_names,
         ),
     }
 
@@ -131,6 +136,7 @@ def quantize_weights_symmetric_int8(
     model: keras.Model,
     quantize_min_rank: int = 2,
     per_channel: bool = True,
+    included_tensor_names: Collection[str] | None = None,
 ) -> WeightQuantizationResult:
     """Quantize kernel-like floating-point Keras weight tensors to signed INT8.
 
@@ -160,6 +166,7 @@ def quantize_weights_symmetric_int8(
         num_bits=8,
         quantize_min_rank=quantize_min_rank,
         per_channel=per_channel,
+        included_tensor_names=included_tensor_names,
     )
 
 
@@ -168,25 +175,40 @@ def quantize_weights_symmetric_n_bits(
     num_bits: int,
     quantize_min_rank: int = 2,
     per_channel: bool = True,
+    included_tensor_names: Collection[str] | None = None,
 ) -> WeightQuantizationResult:
-    """Quantize kernel-like floating-point Keras weights to signed N-bit values."""
+    """Quantize kernel-like floating-point Keras weights to signed N-bit values.
+
+    ``included_tensor_names`` optionally restricts quantization to exact Keras
+    variable paths. When omitted, every eligible rank is quantized as before.
+    """
     qmin, qmax = _signed_symmetric_range(num_bits)
+    included_names = (
+        None if included_tensor_names is None else set(included_tensor_names)
+    )
+    matched_names: set[str] = set()
     quantized_tensors: list[QuantizedTensor] = []
     fp32_size_bytes = 0
     quantized_size_bytes = 0
 
     for weight in model.weights:
         weight_array = weight.numpy()
+        tensor_name = getattr(weight, "path", weight.name)
+        selected_by_name = (
+            included_names is None or tensor_name in included_names
+        )
 
         # Integer tensors and sensitive rank-1 floating tensors are copied into
         # the size accounting unchanged.
         if (
             not np.issubdtype(weight_array.dtype, np.floating)
             or weight_array.ndim < quantize_min_rank
+            or not selected_by_name
         ):
             fp32_size_bytes += weight_array.nbytes
             quantized_size_bytes += weight_array.nbytes
             continue
+        matched_names.add(tensor_name)
 
         quantized, scale, quantization_axis = _quantize_weight_array_symmetric_n_bits(
             weight_array,
@@ -200,7 +222,7 @@ def quantize_weights_symmetric_n_bits(
         quantized_size_bytes += _packed_size_bytes(weight_array.size, num_bits)
         quantized_tensors.append(
             QuantizedTensor(
-                name=weight.name,
+                name=tensor_name,
                 values=quantized,
                 scale=scale,
                 original_shape=tuple(weight_array.shape),
@@ -211,6 +233,14 @@ def quantize_weights_symmetric_n_bits(
                 qmax=qmax,
             )
         )
+
+    if included_names is not None:
+        unmatched_names = included_names - matched_names
+        if unmatched_names:
+            raise ValueError(
+                "Requested tensors were not eligible for quantization: "
+                + ", ".join(sorted(unmatched_names))
+            )
 
     return WeightQuantizationResult(
         tensors=quantized_tensors,

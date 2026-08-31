@@ -34,12 +34,7 @@ def build_resnet18_cifar10_classifier(
     num_classes: int = 10,
     freeze_backbone: bool = True,
 ) -> keras.Model:
-    """Build a CIFAR-10 classifier by replacing ResNet-18's ImageNet head.
-
-    The ImageNet-pretrained backbone is reused as a feature extractor. The
-    original 1000-class Dense layer is replaced with a new randomly initialized
-    Dense layer with ``num_classes`` outputs.
-    """
+   
     imagenet_model = load_pretrained_resnet18()
     backbone = imagenet_model.get_layer("res_net_backbone")
     pooler = imagenet_model.get_layer("pooler")

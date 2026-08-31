@@ -7,7 +7,10 @@ import unittest
 import numpy as np
 from tensorflow import keras
 
-from src.quantization.custom_quantization import custom_ptq
+from src.quantization.custom_quantization import (
+    custom_ptq,
+    quantize_weights_symmetric_int8,
+)
 from src.quantization.custom_quantization.advanced_ptq import (
     QuantizationParams,
     asymmetric_quantization_params,
@@ -18,6 +21,25 @@ from src.quantization.custom_quantization.advanced_ptq import (
 
 
 class IntegerPTQTest(unittest.TestCase):
+    def test_custom_ptq_can_quantize_one_specific_kernel(self) -> None:
+        model = keras.Sequential(
+            [
+                keras.Input(shape=(3,)),
+                keras.layers.Dense(4, name="first"),
+                keras.layers.Dense(2, name="second"),
+            ]
+        )
+        selected = model.layers[1].kernel
+        selected_name = getattr(selected, "path", selected.name)
+
+        result = quantize_weights_symmetric_int8(
+            model, included_tensor_names={selected_name}
+        )
+
+        self.assertEqual(len(result.tensors), 1)
+        self.assertEqual(result.tensors[0].name, selected_name)
+        self.assertEqual(result.tensors[0].original_shape, tuple(selected.shape))
+
     def test_fixed_point_requantization_does_not_change_unit_scale(self) -> None:
         params = asymmetric_quantization_params(-128, 127, dtype="int8")
         accumulator = np.array([-128, -3, 0, 7, 127], dtype=np.int32)
@@ -76,6 +98,7 @@ class IntegerPTQTest(unittest.TestCase):
                 keras.layers.Dense(
                     1,
                     use_bias=False,
+                    name="dense",
                     kernel_initializer=keras.initializers.Constant([[1.0], [1.0]]),
                 ),
             ]

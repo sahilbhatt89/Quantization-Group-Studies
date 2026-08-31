@@ -7,6 +7,7 @@ The current implementation starts with a pretrained ResNet-18 model. The full pr
 See the detailed scope document:
 
 - [Project scope](docs/project_scope.md)
+- [Codebook vector quantization](docs/codebook_vector_quantization.md)
 
 ## Project Steps
 
@@ -87,3 +88,60 @@ notebooks/09_compare_distilbert_sst2_ptq.ipynb
 
 The notebook downloads SST-2 on its first run and reports prediction accuracy,
 parameter ranks, quantized tensor/value counts, and parameter-memory reduction.
+
+## Vision Transformer PTQ on CIFAR-10
+
+The Vision Transformer investigation loads the KerasHub
+`vit_base_patch16_224_imagenet` pretrained weights, trains and caches a CIFAR-10
+classification head, then compares the FP32 model with built-in TFLite
+dynamic-range PTQ and custom per-channel INT8 weight PTQ:
+
+```text
+notebooks/10_compare_vit_cifar10_ptq.ipynb
+```
+
+The notebook reports accuracy, parameter ranks, quantized tensor/value counts,
+TFLite graph dtypes, and parameter-memory reduction.
+
+The full and compute-bounded sensitivity studies are:
+
+- `notebooks/17_resnet18_full_cifar10_ptq_codebook_layer_sensitivity.ipynb` — ResNet-18 W8 layer sensitivity.
+- `notebooks/18_distilbert_full_sst2_ptq_codebook_layer_sensitivity.ipynb` — DistilBERT W8 tensor sensitivity.
+- `notebooks/19_vit_full_cifar10_ptq_codebook_module_sensitivity.ipynb` — ViT W8 module sensitivity.
+- `notebooks/20_resnet18_full_cifar10_4bit_ptq_codebook_layer_sensitivity.ipynb` — ResNet-18 W4 analysis and W4/W8 comparison.
+- `notebooks/21_distilbert_sst2_4bit_stratified_sensitivity_w4_w8.ipynb` — compute-bounded DistilBERT W4/W8 study.
+- `notebooks/22_vit_cifar10_4bit_stratified_sensitivity_w4_w8.ipynb` — compute-bounded ViT W4/W8 study using all 10,000 CIFAR-10 test images.
+- `notebooks/23_distilbert_sst2_ptq_codebook_2_to_8_bit_sweep.ipynb` — full DistilBERT PTQ/codebook 2–8-bit accuracy and compression sweep.
+- `notebooks/24_vit_cifar10_ptq_codebook_2_to_8_bit_sweep.ipynb` — resumable full-test ViT PTQ/codebook 2–8-bit accuracy and compression sweep.
+- `notebooks/25_consolidated_full_model_ptq_codebook_2_to_8_bit_results.ipynb` — read-only report-data loader for FP32 and W8 tables plus saved 2–8-bit accuracy, compression, and memory-reduction results; it performs no model loading, quantization, training, or inference.
+- `notebooks/26_resnet18_full_cifar10_ptq_codebook_2_to_8_bit_sweep.ipynb` — resumable full-test ResNet-18 PTQ and scalar-codebook W2–W8 sweep across all 21 eligible tensors, producing accuracy, compression-ratio, and parameter-memory-reduction tables and graphs.
+
+## Codebook VQ: library baseline vs custom implementation
+
+The first codebook comparison uses the trained CIFAR-10 ResNet-18 and compares
+scikit-learn's built-in `KMeans` codebook construction with the project's
+custom mathematical NumPy implementation under identical vector dimensions,
+codebook sizes, tensor coverage, and evaluation conditions:
+
+```text
+notebooks/11_compare_sklearn_custom_codebook_vq_resnet18.ipynb
+```
+
+
+Jacob, B., Kligys, S., Chen, B., Zhu, M., Tang, M., Howard, A., Adam, H.,
+  and Kalenichenko, D. (2018). Quantization and training of neural networks
+  for efficient integer-arithmetic-only inference. CVPR, 2704–2713.
+  arXiv:1712.05877
+
+Krishnamoorthi, R. (2018). Quantizing deep convolutional networks for
+  efficient inference: A whitepaper. arXiv:1806.08342
+
+Nagel, M., Fournarakis, M., Amjad, R.A., Bondarenko, Y., van Baalen, M.,
+  and Blankevoort, T. (2021). A white paper on neural network quantization.
+  arXiv:2106.08295
+
+  PTQ research papers used
+
+
+
+  

@@ -3,3 +3,12 @@ __pycache__/
 *.py[cod]
 .ipynb_checkpoints/
 artifacts/
+data/sst2/
+
+artifacts/
+data/
+.DS_Store
+
+artifacts/
+data/
+.DS_Store
