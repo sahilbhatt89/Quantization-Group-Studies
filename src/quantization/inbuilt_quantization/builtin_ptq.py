@@ -1,4 +1,10 @@
-"""TensorFlow Lite post-training quantization utilities."""
+"""TensorFlow Lite post-training quantization utilities.
+
+Jacob et al. (2018) and Krishnamoorthi (2018) provide the research background
+for affine integer inference and PTQ calibration.  The actual conversion below
+is delegated to TensorFlow Lite; it is a software baseline, not part of the
+custom PTQ implementation and not a line-by-line reproduction of either paper.
+"""
 
 from __future__ import annotations
 
@@ -39,7 +45,11 @@ def convert_full_integer(
     model: keras.Model,
     representative_dataset: RepresentativeDataset,
 ) -> bytes:
-    """Quantize weights, activations, model input, and model output to INT8."""
+    """Build the executable W8A8 TFLite software baseline.
+
+    Unlike the report's reconstructed-FP32 custom weight path, this conversion
+    uses representative calibration and requests integer built-in operators.
+    """
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
     converter.representative_dataset = representative_dataset

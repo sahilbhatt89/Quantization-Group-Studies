@@ -1,4 +1,11 @@
-"""Pretrained TensorFlow/Keras ResNet-18 model loader."""
+"""Pretrained TensorFlow/Keras ResNet-18 model loader.
+
+Research provenance: He et al. (CVPR 2016) defines residual learning, basic
+blocks, identity shortcuts, and projection shortcuts.  This repository does
+not reimplement those blocks; KerasHub supplies the executable
+``resnet_18_imagenet`` architecture and pretrained weights.  Project code
+reuses its backbone and replaces the task head for CIFAR-10.
+"""
 
 from __future__ import annotations
 
@@ -35,6 +42,8 @@ def build_resnet18_cifar10_classifier(
     freeze_backbone: bool = True,
 ) -> keras.Model:
    
+    # He et al. supplies the architecture; KerasHub is the software source.
+    # The CIFAR-10 dataset facts/labels are attributed to Krizhevsky (2009).
     imagenet_model = load_pretrained_resnet18()
     backbone = imagenet_model.get_layer("res_net_backbone")
     pooler = imagenet_model.get_layer("pooler")

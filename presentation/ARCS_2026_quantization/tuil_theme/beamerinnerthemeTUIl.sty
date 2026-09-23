@@ -1,0 +1,115 @@
+% frame title
+\setbeamertemplate{frametitle}{
+  \vspace{\frametitlev}
+  \usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}\insertframetitle
+  
+  \ifthenelse{\equal{\insertframesubtitle}{\empty}}{}{
+  \vspace{\framesubtitlev}
+  \usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\insertframesubtitle}
+}
+
+
+\newcommand{\titlebody}{
+    \begin{pgfpicture}{\beamerleftmargin}{0}{\paperwidth-5mm}{\paperheight}
+
+    % Title
+	\pgfputat{\pgfpoint{\beamerleftmargin}{\paperheight-\frametitlev-3mm}}{%
+	    \pgfbox[left,top]{%
+		\parbox{\paperwidth-\beamerleftmargin-5mm}{%
+		    \usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}\inserttitle%
+		}
+	    }
+	}
+
+    % Subtitle
+	\pgfputat{\pgfpoint{\beamerleftmargin}{\paperheight-\frametitlev-8mm-\framesubtitlev-\titlesize pt}}{%
+	    \pgfbox[left,top]{%
+		\parbox{\paperwidth-\beamerleftmargin-5mm}{%
+		    \usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\insertsubtitle
+		}
+	    } 
+	}
+
+    %Image
+	\pgfputat{\pgfpoint{0}{\footerdp+\footerht}}{%
+	    \pgfbox[left,bottom]{%
+		\pgfdeclareimage[width=\paperwidth]{titleimg}{\titleimage}%
+		\pgfuseimage{titleimg}
+	    }
+	}
+
+
+    % Author, institute, and date
+    \pgfputat{\pgfpoint{\beamerleftmargin}{\footerht+\footerdp + 5cm}}{%
+      \pgfbox[left,bottom]{%
+        \usebeamercolor[fg]{title page}
+	\parbox{\paperwidth-\beamerleftmargin-5mm}{%
+          \raggedright\fontsize{9}{11}\selectfont
+          \setbox0=\hbox{\insertauthor\unskip}\ifdim\wd0=0pt\else%
+            \insertauthor\newline
+          \fi%
+          %\setbox0=\hbox{\insertinstitute\unskip}\ifdim\wd0=0pt\else%
+          %  \insertinstitute\newline
+          %\fi%
+          \setbox0=\hbox{\insertdate\unskip}\ifdim\wd0=0pt\else%
+            \insertdate
+          \fi%
+          \smallskip
+        }
+      }
+    }
+
+    %TU logo
+    \pgfputat{\pgfpoint{\paperwidth-5mm}{\footerdp}}{%
+        \pgfbox[right,center]{%
+            \pgfdeclareimage[height=\footerht]{tulogo}{images/tuil-logo_woborder.pdf}%
+            \pgfuseimage{tulogo}
+        }
+    }
+
+    %RAES Institute + date
+    \pgfputat{\pgfpoint{\paperwidth*0.5}{\footerdp}}{%
+        \pgfbox[center,center]{%
+            \scriptsize
+            \usebeamerfont{footer}\usebeamercolor[fg]{footer}
+	\parbox{\paperwidth-\beamerleftmargin-5mm}{%
+          \centering\insertinstitute
+        }
+        }
+    }
+
+    %RAES logo
+    \pgfputat{\pgfpoint{\beamerleftmargin}{\footerdp}}{%
+        \pgfbox[left,center]{%
+            \pgfdeclareimage[height=\footerht]{raeslogo}{images/raes-logo.pdf}%
+            \pgfuseimage{raeslogo}
+        }
+    }
+
+    \end{pgfpicture}
+
+}
+
+
+
+% title page
+\setbeamertemplate{title page}
+{
+    \ifthenelse{\isundefined{\titleimage}}
+  {
+    \begin{center}
+      \usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}\inserttitle
+
+      \vspace{\framesubtitlev}
+      \usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\insertsubtitle
+
+      \vspace{1.5mm}
+      \insertauthor\\
+      {\scriptsize\insertinstitute}\\~\\
+      {\small\insertdate}
+    \end{center}
+  }  
+  {
+    \titlebody
+  }
+}

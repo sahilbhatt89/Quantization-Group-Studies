@@ -1,0 +1,57 @@
+{
+  "notebook": "notebooks/20_resnet18_full_cifar10_4bit_ptq_codebook_layer_sensitivity.ipynb",
+  "plot_cell_index": 34,
+  "sources": {
+    "artifacts/resnet18_4bit_layer_sensitivity/layer_sensitivity_w4_vs_w8.csv": "1cdc1654d76f814d5a4a1abfb6bbb4ebe864015ffe9ee90530a59c4fef68ce7a",
+    "artifacts/resnet18_4bit_layer_sensitivity/layerwise_sensitivity_all_methods.csv": "2aaf2d60dd1bc7eed0887fe28fdd25ac888d272944f0c7f258a85425831c9994",
+    "artifacts/resnet18_full_layer_sensitivity/layerwise_sensitivity_all_methods.csv": "3349b0535f0ff270c33b1b13a2a079c2735379d6735a1ec24bd0d38177d67583"
+  },
+  "figure": "artifacts/resnet18_4bit_layer_sensitivity/figure6_layer_sensitivity_heatmap_w4_w8.png",
+  "figure_sha256": "a7be2db5a4c608d369075428864c2d24706328dffe4010a8bd0a18624b9f2d3f",
+  "row_order": [
+    "conv1_conv/kernel",
+    "stack0_block0_1_conv/kernel",
+    "stack0_block1_1_conv/kernel",
+    "stack0_block0_2_conv/kernel",
+    "stack1_block0_1_conv/kernel",
+    "stack1_block1_1_conv/kernel",
+    "stack2_block0_1_conv/kernel",
+    "stack2_block1_1_conv/kernel",
+    "stack0_block1_2_conv/kernel",
+    "stack1_block0_2_conv/kernel",
+    "stack2_block0_2_conv/kernel",
+    "stack1_block0_0_conv/kernel",
+    "stack2_block0_0_conv/kernel",
+    "stack1_block1_2_conv/kernel",
+    "stack3_block0_1_conv/kernel",
+    "stack3_block0_2_conv/kernel",
+    "stack3_block1_2_conv/kernel",
+    "stack3_block1_1_conv/kernel",
+    "cifar10_predictions/kernel",
+    "stack3_block0_0_conv/kernel",
+    "stack2_block1_2_conv/kernel"
+  ],
+  "column_order": [
+    "ptq_w4",
+    "ptq_w8",
+    "codebook_w4",
+    "codebook_w8"
+  ],
+  "full_color_scale_pp": [
+    -80.0,
+    80.0
+  ],
+  "detail_color_scale_pp": [
+    -7.0,
+    7.0
+  ],
+  "detail_omits": [
+    "conv1_conv/kernel",
+    "stack0_block0_1_conv/kernel",
+    "stack0_block1_1_conv/kernel"
+  ],
+  "color_center_pp": 0,
+  "significance_marker": "FDR-adjusted McNemar p < 0.05",
+  "style": "12x15 inch dual-scale coolwarm heatmaps, full context plus annotated detail, 180 dpi",
+  "inference_rerun": false
+}

@@ -1,0 +1,22 @@
+% Remove beamer navigation bar
+\beamertemplatenavigationsymbolsempty
+
+% footer/footline definition
+\setbeamertemplate{footline}{
+    \color{TUIl-green}{\rule{\textwidth}{0.3pt}} % Draw line
+    \begin{beamercolorbox}[wd=\textwidth, dp=\footerdp, ht=\footerht]{footer}
+        \begin{minipage}[t]{0.125\paperwidth}% Page number
+            \hspace{7mm}
+            \insertframenumber
+        \end{minipage}%
+        \begin{minipage}[t]{0.660\paperwidth}% Footer content
+            \footercontent
+        \end{minipage}%
+            \hfill%
+        \begin{minipage}[t]{0.21\paperwidth}% logo
+            \hfill%
+            \raisebox{-.5\height}{\includegraphics[height=\footerht]{images/TU-logo_woborder.pdf}}%
+            \hspace{5mm}
+        \end{minipage}
+    \end{beamercolorbox}
+}

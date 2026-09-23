@@ -1,4 +1,38 @@
 """Mathematical codebook and product-vector weight quantization.
+
+Research provenance
+-------------------
+FINAL-RESULT PATH (tensor-local scalar codebooks, ``vector_dim=1``):
+
+* Gray (1984): finite codebooks, nearest-codeword assignments, and lookup
+  reconstruction form the classical vector-quantization foundation.
+* Arthur and Vassilvitskii (2007): ``fit_kmeans_codebook`` uses fixed-seed
+  k-means++ D-squared initialization.
+* Lloyd (1982): the same function alternates nearest-centroid assignment and
+  centroid-mean updates until convergence.
+* Gong et al. (2014): motivates applying vector quantization to neural-network
+  parameter tensors.
+* Han et al. (ICLR 2016): motivates weight sharing and accounting for packed
+  assignment indices plus stored centroids.  Pruning, retraining, and Huffman
+  coding from Deep Compression are not implemented here.
+
+OPTIONAL LIBRARY PATHS, IMPLEMENTED BUT NOT USED IN FINAL RESULTS:
+
+* Jegou et al. (2011): product quantization in ``product_quantize_array``.
+* Choi et al. (2017): importance-weighted distortion and gradient-squared
+  importance proxies in the importance-aware functions.
+* Shao et al. (2024), DPQ: usage-prioritized product-codebook pooling and
+  distance pruning in ``compress_product_codebooks``.  No diffusion model,
+  DDPM loss, or activation-aware DPQ training is implemented.
+* Deng et al. (2024), VQ4ALL: balanced multi-tensor sampling and Gaussian-KDE
+  universal-codebook generation in ``build_universal_codebook_kde``.  No
+  differentiable assignments, task-loss optimization, or progressive network
+  construction is implemented.
+
+The final report reconstructs codebook weights for FP32 Keras execution.
+Following the deployment caution discussed by Abushahla et al. (2025), stored
+assignment compression is not presented as measured latency, energy, or
+runtime-memory improvement.
 """
 
 from __future__ import annotations
@@ -30,7 +64,7 @@ class VectorLayout:
 
 @dataclass(frozen=True)
 class CodebookQuantizedTensor:
-    """Integer assignments, codebooks, and tensor-layout metadata."""
+    """Gray/Han-style assignments, shared centroids, and layout metadata."""
 
     name: str
     assignments: np.ndarray
@@ -139,7 +173,12 @@ def vector_quantize_array(
     """Quantize all sub-vectors using one shared nearest-centroid codebook.
 
     If ``codebook`` is supplied, it is treated as a frozen universal codebook;
-    otherwise a deterministic NumPy k-means codebook is fitted to the tensor.
+    otherwise a fixed-seed NumPy k-means codebook is fitted to the tensor.
+
+    Gray supplies the classical nearest-codeword formulation.  Gong and Han
+    motivate applying it to neural-network weights and storing shared centroid
+    indices.  The report calls this with ``vector_dim=1``, so its evaluated
+    configuration is scalar rather than multi-value vector quantization.
     """
     vectors, layout = vectorize_array(array, vector_dim, axis=axis)
     flat_vectors = vectors.reshape(-1, vector_dim)
@@ -189,11 +228,12 @@ def product_quantize_array(
     seed: int = 42,
     name: str = "tensor",
 ) -> CodebookQuantizedTensor:
-    """Apply product quantization with one codebook per vector position.
+    """Apply Jegou-style product quantization with one codebook per position.
 
     For a matrix with width ``n`` and vector dimension ``d``, this produces
     ``n / d`` codebooks. Assignment ``(i, j)`` selects the nearest codeword in
-    codebook ``j`` for row ``i`` and subspace ``j``.
+    codebook ``j`` for row ``i`` and subspace ``j``.  This optional path is
+    unit-tested but is not used by the final report experiments.
     """
     vectors, layout = vectorize_array(array, vector_dim, axis=axis)
     group_count = vectors.shape[1]
@@ -247,13 +287,15 @@ def build_universal_codebook_kde(
     seed: int = 42,
     codebook_dtype: np.dtype | str = np.float32,
 ) -> np.ndarray:
-    """Sample one universal codebook from an equal-weight Gaussian KDE.
+    """Sample a VQ4ALL-inspired universal codebook from a Gaussian KDE.
 
     Each source array contributes exactly ``samples_per_array`` sub-vectors
     (sampling with replacement when needed), preventing a large model/tensor
     from dominating the shared distribution. Sampling a Gaussian KDE is
     equivalent to selecting an observed vector and adding Gaussian noise with
-    the selected bandwidth.
+    the selected bandwidth.  This is only the reusable KDE/codebook component;
+    it is not a reproduction of VQ4ALL's training procedure and is not used in
+    the final scalar-codebook results.
     """
     if not arrays:
         raise ValueError("arrays must contain at least one tensor.")
@@ -294,12 +336,14 @@ def compress_product_codebooks(
     distance_threshold: float = 0.0,
     pool_dtype: np.dtype | str = np.float16,
 ) -> PooledCodebookTensor:
-    """Compress product codebooks using usage priority and distance pruning.
+    """Apply DPQ-inspired usage-priority and distance-based codebook pooling.
 
     Centroid importance is its assignment frequency. Centroids are considered
     redundant when their RMS L2 distance from a selected pool vector is at or
     below ``distance_threshold``. If pruning yields fewer vectors than the
-    target, the remaining most-used centroids fill the pool, as in DPQ.
+    target, the remaining most-used centroids fill the pool, as in DPQ.  This
+    optional utility does not implement DPQ's diffusion or activation-aware
+    optimization and is not used in the final experiments.
     """
     if quantized.mode != "product" or quantized.codebooks.ndim != 3:
         raise ValueError("compress_product_codebooks requires product quantization.")
@@ -405,13 +449,16 @@ def codebook_vectorize_model(
     kmeans_iterations: int = 50,
     seed: int = 42,
 ) -> ModelCodebookQuantizationResult:
-    """Codebook-quantize every floating model tensor of sufficient rank.
+    """Apply Gong/Han-style codebook weight sharing to selected model tensors.
 
     The original model is not mutated. Biases and normalization vectors are
     retained in their original representation and included in size accounting.
     Names in ``excluded_tensor_names`` are also retained exactly. This is useful
     for mixed-precision PTQ, where accuracy-sensitive input/output tensors stay
     in FP32 while the remaining kernels use codebook assignments.
+
+    Final experiments pass ``mode='vector'`` and ``vector_dim=1``. Product and
+    importance-weighted branches are optional research-informed capabilities.
     """
     if mode not in {"vector", "product"}:
         raise ValueError("mode must be 'vector' or 'product'.")
@@ -504,8 +551,9 @@ def reconstruct_codebook_model_weights(
     """Return model-order weights reconstructed from a codebook report.
 
     The returned list can be passed to ``clone.set_weights(...)`` for accuracy
-    evaluation. It does not mutate ``model`` and does not pretend that the
-    reconstructed FP32 execution is an indexed-codebook hardware runtime.
+    evaluation. It does not mutate ``model`` and, consistent with the hardware
+    caveat emphasized by Abushahla et al., does not pretend that reconstructed
+    FP32 execution is an indexed-codebook hardware runtime.
     """
     tensors_by_name = {tensor.name: tensor for tensor in result.tensors}
     if len(tensors_by_name) != len(result.tensors):
@@ -584,7 +632,7 @@ def fit_kmeans_codebook(
     tolerance: float = 1e-6,
     seed: int = 42,
 ) -> np.ndarray:
-    """Fit centroids with deterministic k-means++ and Lloyd updates."""
+    """Fit centroids with Arthur--Vassilvitskii initialization and Lloyd updates."""
     data = np.asarray(vectors, dtype=np.float32)
     if data.ndim != 2 or not len(data):
         raise ValueError("vectors must be a non-empty rank-2 array.")
@@ -594,6 +642,8 @@ def fit_kmeans_codebook(
 
     rng = np.random.default_rng(seed)
     centers = np.empty((codebook_size, data.shape[1]), dtype=np.float32)
+    # Arthur and Vassilvitskii (k-means++): choose later centers with
+    # probability proportional to squared distance from the nearest center.
     centers[0] = data[rng.integers(len(data))]
     closest_distance = np.sum((data - centers[0]) ** 2, axis=1)
     for center_index in range(1, codebook_size):
@@ -606,6 +656,7 @@ def fit_kmeans_codebook(
         distance = np.sum((data - centers[center_index]) ** 2, axis=1)
         closest_distance = np.minimum(closest_distance, distance)
 
+    # Lloyd iteration: nearest-center assignment followed by centroid means.
     for _ in range(iterations):
         assignment = nearest_codeword_indices(data, centers)
         updated = centers.copy()
@@ -637,7 +688,11 @@ def fit_importance_weighted_kmeans_codebook(
     tolerance: float = 1e-6,
     seed: int = 42,
 ) -> np.ndarray:
-    """Fit k-means centroids while weighting each squared-error coordinate."""
+    """Fit centroids with Choi-inspired importance-weighted distortion.
+
+    This optional path is implemented and tested but is not used by the final
+    unweighted scalar-codebook experiments.
+    """
     data = np.asarray(vectors, dtype=np.float32)
     weights = np.asarray(importance, dtype=np.float32)
     if data.ndim != 2 or not len(data) or weights.shape != data.shape:
@@ -869,10 +924,11 @@ def estimate_gradient_importance(
     use_square_root: bool = False,
     epsilon: float = 1e-12,
 ) -> dict[str, np.ndarray]:
-    """Estimate a diagonal Hessian proxy by averaging squared gradients.
+    """Estimate a Choi-style diagonal sensitivity proxy from squared gradients.
 
     All selected floating weights are watched explicitly, so frozen pretrained
-    backbones are supported as well as trainable layers.
+    backbones are supported as well as trainable layers.  This optional proxy
+    is not used in the final reported codebook sweep or sensitivity ranking.
     """
     included = None if included_tensor_names is None else set(included_tensor_names)
     selected = []

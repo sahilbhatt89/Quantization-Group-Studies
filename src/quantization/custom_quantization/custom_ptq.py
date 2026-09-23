@@ -1,8 +1,30 @@
 """Custom post-training quantization for configurable bit widths.
 
+Research provenance
+-------------------
+FINAL-RESULT PATH:
+
+* Jacob et al. (CVPR 2018) supplies the affine integer-quantization framework.
+  The evaluated weight path is its signed symmetric special case: zero point
+  ``z = 0``, ``q = clip(round(w / scale))``, and ``w_hat = scale * q``.
+* Krishnamoorthi (2018) motivates post-training calibration and per-output-
+  channel weight scales.  The evaluated models use one scale per last-axis
+  output channel and leave low-rank bias/normalization tensors in FP32.
+* Nagel et al. (2021) supplies the broader PTQ terminology, design choices,
+  and low-bit failure-mode context used to interpret the experiments.
+
+OPTIONAL, NOT USED IN THE REPORTED ACCURACY SWEEPS:
+
+* ``calibrate_activation_ranges`` implements representative-data min/max
+  calibration for affine UINT8 activation parameters.  It records parameters
+  only; it does not insert fake-quantization nodes or propagate integer
+  activations through the model.
+
 This module intentionally does not use TensorFlow Lite, TensorFlow Model
 Optimization Toolkit, ONNX Runtime, or Hugging Face quantization helpers.
-The goal is to keep the quantization math visible for the project study.
+The goal is to keep the research-informed quantization math visible.  Accuracy
+evaluation reconstructs floating weights for ordinary Keras execution, so this
+module does not claim integer-only inference, latency, or energy improvements.
 """
 
 from __future__ import annotations
@@ -182,6 +204,9 @@ def quantize_weights_symmetric_n_bits(
     ``included_tensor_names`` optionally restricts quantization to exact Keras
     variable paths. When omitted, every eligible rank is quantized as before.
     """
+    # Jacob et al.: use a zero-centered specialization of affine quantization.
+    # The symmetric range intentionally omits the extra negative two's-
+    # complement value, e.g. W8 uses [-127, 127] rather than [-128, 127].
     qmin, qmax = _signed_symmetric_range(num_bits)
     included_names = (
         None if included_tensor_names is None else set(included_tensor_names)
@@ -198,8 +223,9 @@ def quantize_weights_symmetric_n_bits(
             included_names is None or tensor_name in included_names
         )
 
-        # Integer tensors and sensitive rank-1 floating tensors are copied into
-        # the size accounting unchanged.
+        # Krishnamoorthi-style engineering policy: quantize kernel/embedding
+        # tensors while preserving rank-1 bias and normalization parameters.
+        # Preserved values remain part of the compressed-size denominator.
         if (
             not np.issubdtype(weight_array.dtype, np.floating)
             or weight_array.ndim < quantize_min_rank
@@ -266,8 +292,11 @@ def calibrate_activation_ranges(
         scale = (r_max - r_min) / 255
         zero_point = clip(round(-r_min / scale), 0, 255)
 
-    This is calibration only: no fake-quantization nodes are inserted into the
-    Keras model and no dequantized activations are fed to later layers.
+    This follows the affine scale/zero-point framework of Jacob et al. and the
+    representative-data PTQ calibration practice discussed by Krishnamoorthi.
+    It is calibration only: no fake-quantization nodes are inserted into the
+    Keras model and no dequantized activations are fed to later layers.  The
+    report's custom accuracy sweeps do not use this optional activation path.
     """
     if not representative_samples:
         raise ValueError("representative_samples must contain at least one sample.")
@@ -328,7 +357,11 @@ def calibrate_activation_ranges(
 
 
 def dequantize_tensor(quantized_tensor: QuantizedTensor) -> np.ndarray:
-    """Convert a custom INT8 tensor back to an FP32 approximation."""
+    """Reconstruct FP32 weights using the Jacob-style inverse mapping.
+
+    This reconstruction is used for accuracy evaluation; it is not a packed
+    low-bit or integer-arithmetic runtime.
+    """
     scale = quantized_tensor.scale
     if isinstance(scale, np.ndarray):
         scale_shape = [1] * quantized_tensor.values.ndim
@@ -404,6 +437,8 @@ def _quantize_array_symmetric_n_bits_per_channel(
 ) -> tuple[np.ndarray, np.ndarray]:
     axis = axis % array.ndim
     reduce_axes = tuple(index for index in range(array.ndim) if index != axis)
+    # Krishnamoorthi: independent last-axis/output-channel ranges prevent one
+    # outlier channel from setting the resolution for every filter or unit.
     max_abs = np.max(np.abs(array), axis=reduce_axes)
     scale = np.where(max_abs > 0, max_abs / qmax, 1.0).astype(np.float32)
 

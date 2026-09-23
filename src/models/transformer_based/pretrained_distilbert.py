@@ -1,4 +1,11 @@
-"""Pretrained KerasHub DistilBERT model loaders."""
+"""Pretrained KerasHub DistilBERT model loaders.
+
+Research provenance: Vaswani et al. (2017) supplies the Transformer attention
+and feed-forward foundation; Sanh et al. (2019) defines the distilled
+six-layer DistilBERT architecture.  KerasHub supplies the executable preset and
+pretrained weights.  Socher et al. (2013) supplies the source sentiment corpus,
+and Wang et al. (2019) defines SST-2's GLUE benchmark use.
+"""
 
 from __future__ import annotations
 

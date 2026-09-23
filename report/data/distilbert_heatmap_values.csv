@@ -1,0 +1,16 @@
+unit,ptq_w4,ptq_w8,codebook_w4,codebook_w8
+transformer_layer_2/feedforward_intermediate_dense/kernel,0.1146788990825653,0.0,0.2293577981651307,0.2293577981651307
+token_and_position_embedding/position_embedding/embeddings,0.1146788990825653,0.0,-0.3440366972477071,-0.2293577981651418
+transformer_layer_2/self_attention_layer/query/kernel,0.1146788990825653,0.0,0.0,-0.1146788990825764
+transformer_layer_2/self_attention_layer/attention_output/kernel,0.1146788990825653,0.0,-0.1146788990825764,-0.1146788990825764
+transformer_layer_5/self_attention_layer/query/kernel,0.1146788990825653,0.0,0.2293577981651307,0.0
+transformer_layer_0/feedforward_output_dense/kernel,0.0,-0.2293577981651418,-0.1146788990825764,-0.1146788990825764
+transformer_layer_0/self_attention_layer/attention_output/kernel,0.0,0.0,0.2293577981651307,0.0
+transformer_layer_5/feedforward_output_dense/kernel,0.0,0.0,-0.1146788990825764,-0.1146788990825764
+pooled_dense/kernel,0.0,0.0,-0.1146788990825764,0.0
+transformer_layer_0/self_attention_layer/query/kernel,-0.1146788990825764,-0.1146788990825764,-0.1146788990825764,0.0
+transformer_layer_5/self_attention_layer/attention_output/kernel,-0.1146788990825764,0.0,-0.1146788990825764,0.0
+logits/kernel,-0.1146788990825764,0.0,0.0,0.0
+transformer_layer_2/feedforward_output_dense/kernel,-0.2293577981651418,0.0,0.2293577981651307,0.1146788990825653
+transformer_layer_2/self_attention_layer/value/kernel,-0.2293577981651418,0.0,0.1146788990825653,0.0
+token_and_position_embedding/token_embedding/embeddings,-0.3440366972477071,0.0,-0.1146788990825764,-0.2293577981651418

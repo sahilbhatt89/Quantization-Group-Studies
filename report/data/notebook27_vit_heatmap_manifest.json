@@ -1,0 +1,66 @@
+{
+  "generated_by": "notebooks/27_vit_w4_w8_sensitivity_heatmap_from_notebook22.ipynb",
+  "source_notebook": "notebooks/22_vit_cifar10_4bit_stratified_sensitivity_w4_w8.ipynb",
+  "source_csv": "artifacts/vit_4bit_stratified_sensitivity/stratified_module_w4_vs_w8.csv",
+  "source_csv_sha256": "c7204436c96ed422a5e3eb3a8ef204ff0062f98a71d1de9f2212787f2e299a26",
+  "source_plot_data_cell_index": 13,
+  "module_order": [
+    "input_embedding",
+    "transformer_block_1",
+    "transformer_block_3",
+    "transformer_block_6",
+    "transformer_block_9",
+    "transformer_block_11",
+    "classifier"
+  ],
+  "column_order": [
+    "ptq_w4",
+    "ptq_w8",
+    "codebook_w4",
+    "codebook_w8"
+  ],
+  "metric": "FP32 accuracy minus isolated quantized accuracy, in percentage points",
+  "coverage": {
+    "sampled_modules": 7,
+    "total_modules": 14,
+    "test_examples": 10000
+  },
+  "color_scale_pp": [
+    -0.35,
+    0.35
+  ],
+  "color_normalization": "TwoSlopeNorm, zero-centered, symmetric bounds",
+  "color_center_pp": 0,
+  "shared_scale_with": "DistilBERT (Notebook 21)",
+  "cell_annotations": false,
+  "figure_size_inches": [
+    10,
+    9
+  ],
+  "png_dpi": 180,
+  "style_reference_notebooks": [
+    20,
+    21
+  ],
+  "inference_rerun": false,
+  "software": {
+    "python": "3.13.7",
+    "numpy": "2.4.6",
+    "pandas": "3.0.3",
+    "matplotlib": "3.10.9"
+  },
+  "outputs": [
+    {
+      "path": "artifacts/vit_w4_w8_heatmap/vit_w4_w8_module_sensitivity_heatmap.png",
+      "sha256": "bfe37b10cf2dcc327015c6b081699295c103004b43e4b8a1b70876cbdf664d54"
+    },
+    {
+      "path": "artifacts/vit_w4_w8_heatmap/vit_w4_w8_module_sensitivity_heatmap.pdf",
+      "sha256": "c2d55828854c82f1c580fb57c2f544c473b3e32445fde7ca812a0ac76e2b2299"
+    },
+    {
+      "path": "artifacts/vit_w4_w8_heatmap/vit_w4_w8_heatmap_values.csv",
+      "sha256": "9d8c6cb7c0159fc42f62d6f4551e4d07378d4b4700d56a02c179b0a6fdfcd4c7"
+    }
+  ]
+}

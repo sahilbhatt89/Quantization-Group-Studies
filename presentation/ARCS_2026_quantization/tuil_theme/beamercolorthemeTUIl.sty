@@ -1,0 +1,71 @@
+% TU Ilmenau color scheme definitions
+\definecolor{TUIl-orange}{RGB}{255, 121, 0}
+\definecolor{TUIl-blue}{RGB}{0, 51, 89}
+\definecolor{TUIl-green}{RGB}{0, 116, 122}
+\definecolor{TUIl-grey}{RGB}{165, 165, 165}
+
+% = Font Colors =
+% background
+\setbeamercolor*{background canvas}{bg=white}
+
+% title/subtitle
+\setbeamercolor{frametitle}{fg=TUIl-orange}
+\setbeamercolor{framesubtitle}{fg=TUIl-blue}
+
+% text
+\setbeamercolor*{normal text}{fg=TUIl-blue}
+
+% itemize
+\setbeamercolor*{itemize item}{fg=TUIl-orange}
+\setbeamercolor*{itemize subitem}{fg=TUIl-blue}
+\setbeamercolor*{itemize subsubitem}{fg=TUIl-blue}
+
+% enumerate
+\setbeamercolor*{enumerate item}{fg=TUIl-orange}
+\setbeamercolor*{enumerate subitem}{fg=TUIl-blue}
+\setbeamercolor*{enumerate subsubitem}{fg=TUIl-blue}
+
+% block colors/style
+\setbeamercolor{block body}{fg=TUIl-blue,bg=TUIl-blue!10!bg}
+\setbeamercolor{block title}{parent=structure,fg=white,bg=TUIl-blue}
+\setbeamertemplate{blocks}[rounded][shadow=false]
+
+% alert
+\setbeamercolor{alerted text}{fg=TUIl-orange}
+
+% footer
+\setbeamercolor*{footer}{bg=white, fg=TUIl-grey}
+\setbeamercolor*{page number in head/foot}{fg=TUIl-grey}
+
+% bibliography
+\setbeamercolor{bibliography entry author}{fg=TUIl-blue}
+\setbeamercolor{bibliography entry title}{fg=TUIl-blue}
+\setbeamercolor{bibliography entry journal}{fg=TUIl-blue}
+\setbeamercolor{bibliography entry note}{fg=TUIl-blue}
+
+% = Font Sizes =
+% title/subtitle
+\setbeamerfont{frametitle}{size*={\the\numexpr \titlesize \relax}{\the\numexpr \titlesize + 1\relax}\selectfont,series=\bfseries}
+\setbeamerfont{framesubtitle}{size*={\the\numexpr \subtitlesize \relax}{\the\numexpr \subtitlesize + 1 \relax}\selectfont}
+
+% Font size for thebibliography environments
+\setbeamerfont{bibliography entry author}{size=\footnotesize}
+\setbeamerfont{bibliography entry title}{size=\footnotesize}
+\setbeamerfont{bibliography entry journal}{size=\footnotesize}
+\setbeamerfont{bibliography entry note}{size=\footnotesize}
+
+% Font size for BibLaTeX (\printbibliography)
+\@ifpackageloaded{biblatex}{\AtBeginBibliography{\footnotesize}}{}
+
+% bullet points for itemize
+\defbeamertemplate{itemize item}{image}{\tiny \raisebox{0.5ex}{$\bullet$}}
+\defbeamertemplate{itemize subitem}{image}{\tiny \raisebox{0.5ex}{$\bullet$}}
+\defbeamertemplate{itemize subsubitem}{image}{\tiny \raisebox{0.5ex}{$\bullet$}}
+
+\setbeamertemplate{itemize item}[image]
+\setbeamertemplate{itemize subitem}[image]
+\setbeamertemplate{itemize subsubitem}[image]
+
+% bibliography icons
+%\setbeamertemplate{bibliography item}{\lower3.5pt\hbox{\hskip2pt\scalebox{0.7}{\pgfuseimage{beamericonarticle}}\hskip1pt}} 
+\setbeamertemplate{bibliography item}{\insertbiblabel}

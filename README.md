@@ -115,6 +115,7 @@ The full and compute-bounded sensitivity studies are:
 - `notebooks/24_vit_cifar10_ptq_codebook_2_to_8_bit_sweep.ipynb` — resumable full-test ViT PTQ/codebook 2–8-bit accuracy and compression sweep.
 - `notebooks/25_consolidated_full_model_ptq_codebook_2_to_8_bit_results.ipynb` — read-only report-data loader for FP32 and W8 tables plus saved 2–8-bit accuracy, compression, and memory-reduction results; it performs no model loading, quantization, training, or inference.
 - `notebooks/26_resnet18_full_cifar10_ptq_codebook_2_to_8_bit_sweep.ipynb` — resumable full-test ResNet-18 PTQ and scalar-codebook W2–W8 sweep across all 21 eligible tensors, producing accuracy, compression-ratio, and parameter-memory-reduction tables and graphs.
+- `notebooks/27_vit_w4_w8_sensitivity_heatmap_from_notebook22.ipynb` — executed ViT W4/W8 heatmap notebook using Notebook 22's saved matched results; exports PNG/PDF, the 28 plotted values and a source-checksum manifest without rerunning inference.
 
 ## Codebook VQ: library baseline vs custom implementation
 

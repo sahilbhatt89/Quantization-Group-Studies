@@ -12,3 +12,8 @@ data/
 artifacts/
 data/
 .DS_Store
+
+# Small report-source tables are versioned; evaluation datasets remain ignored.
+!report/data/
+!report/data/*.csv
+!report/data/*.json

@@ -1,0 +1,4 @@
+analysis,units,unique_w4_values,unique_w8_values,spearman_rho,permutation_p,permutations,test,kendall_tau_b,kendall_asymptotic_p
+"reported ranks (accuracy, then disagreement tie-break)",15,15,15,0.6928571428571427,0.00526,199999,Monte Carlo,0.5428571428571429,0.00414288160001619
+accuracy degradation only (average ties),15,5,5,0.7129817444219066,0.003765,199999,Monte Carlo,0.6493506493506492,0.004515904819745466
+prediction disagreement only (average ties),15,7,4,0.6091796797830641,0.01857,199999,Monte Carlo,0.48560678896445836,0.030599176223979757

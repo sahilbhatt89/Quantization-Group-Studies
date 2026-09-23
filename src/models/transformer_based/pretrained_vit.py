@@ -1,4 +1,11 @@
-"""Pretrained KerasHub Vision Transformer model loaders."""
+"""Pretrained KerasHub Vision Transformer model loaders.
+
+Research provenance: Vaswani et al. (2017) supplies the Transformer encoder
+foundation; Dosovitskiy et al. (ICLR 2021) defines ViT patch tokens, positional
+embeddings, class token, and Transformer image classification.  KerasHub
+supplies the executable ViT-B/16 preset and pretrained weights.  CIFAR-10
+dataset facts and labels are attributed to Krizhevsky (2009).
+"""
 
 from __future__ import annotations
 
