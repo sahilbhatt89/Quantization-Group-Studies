@@ -1,0 +1,13 @@
+model,bit_width,method,tests,discordant_min,discordant_median,discordant_max,raw_0_05_unattainable,first_bh_cutoff_unattainable,fdr_significant
+ResNet-18,4,ptq,21,133,453.0,6393,0,0,14
+ResNet-18,4,codebook,21,55,236.0,8226,0,0,13
+ResNet-18,8,ptq,21,6,21.0,271,0,5,1
+ResNet-18,8,codebook,21,3,13.0,218,4,8,1
+DistilBERT,4,codebook,15,0,2.0,9,12,15,0
+DistilBERT,4,ptq,15,0,3.0,13,12,14,0
+DistilBERT,8,ptq,40,0,0.0,2,40,40,0
+DistilBERT,8,codebook,40,0,0.0,12,39,39,0
+ViT-B/16,4,ptq,7,29,60.0,117,0,0,0
+ViT-B/16,4,codebook,7,21,51.0,76,0,0,0
+ViT-B/16,8,ptq,14,2,5.0,8,9,14,0
+ViT-B/16,8,codebook,14,3,7.5,30,4,8,0

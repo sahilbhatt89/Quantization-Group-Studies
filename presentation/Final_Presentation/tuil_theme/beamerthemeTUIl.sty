@@ -1,0 +1,261 @@
+\mode<presentation>
+
+% * * * * * * * * * * * * * * * * * * * *
+% * LaTeX Beamer Design for TU Ilmenau  *
+% * * * * * * * * * * * * * * * * * * * *
+%
+% Available colors:
+% - TUIl-orange
+% - TUIl-blue
+% - TUIl-green
+% - TUIl-grey
+%
+% For color codes, look at beamercolorthemeTUIL.sty
+%
+% Available functions:
+%   \imageframe[text color]{path to image}{frame title}{scale of the image}{horizontal offset}{vertical offset}
+%       Creates a frame that only consists of one picture
+%   \titleframe
+%       Sets up the first frame of the presentation
+%   \lastframe	{frame title}{frame subtitle}
+%       Creates the last frame to be used for a presentation
+
+% If you don't intent to use pictures in the first and last frame, you can remove the following two lines
+\RequirePackage{tikz} % (tikz is needed for absolute placement independent of aspect ratio)
+\usetikzlibrary{calc, positioning}
+
+% Don't edit the text below
+
+% No monospace font for URLs
+\RequirePackage{url}
+\urlstyle{same}
+
+\RequirePackage{xcolor}
+\RequirePackage{xifthen}
+
+% interpret empty string for pictures as undefined
+\newcommand{\undefineEmpty}[1]{
+	\ifdefined#1
+		\ifthenelse{\equal{#1}{}}{
+			\let #1 \undefined
+		}{}
+	\fi
+}
+
+%\undefineEmpty{\titleimage}
+%\undefineEmpty{\lastimage}
+
+\ifdefined\titleimage\else %set default title image
+  \def\titleimage{images/humbold.jpg}
+\fi
+\ifdefined\lastimage\else %set default last image
+  \def\lastimage{images/campus.jpg}
+\fi
+
+\ifthenelse{ % If aspect ratio is 4:3
+    \lengthtest{\dimexpr\paperwidth*254/7227\relax=12.8pt}
+    \AND
+    \lengthtest{\dimexpr\paperheight*254/7227\relax=9.6pt}
+}{ % define dimensions specific to 4:3 aspect ratio
+	\def\frametitlev{2.5mm}
+	\def\framesubtitlev{1mm}
+	\def\bottompicscale{1.3}
+	\def\footerdp{6mm}
+	\def\footerht{7mm}
+
+	% scale down font
+	\def\fontscale{0.8}
+
+	% set global margins
+	\setbeamersize{text margin left=7mm,text margin right=5mm}
+	\def\beamerleftmargin{7mm}
+}{ % define geometry specific to 16:9/16:10 aspect ratio
+	\def\frametitlev{0mm}
+	\def\framesubtitlev{2.5mm}
+	\def\bottompicscale{1}
+	\def\footerdp{5mm}
+	\def\footerht{6mm}
+
+	% increase margins
+	\def\fontscale{1}
+	\renewcommand{\baselinestretch}{1.1}
+
+	% set margin for itemize
+	\let\olditemize=\itemize
+	\let\endolditemize=\enditemize
+	\renewenvironment{itemize}{\olditemize \itemsep1mm \parskip1mm}{\endolditemize}
+
+	% set margin for enumerate
+	\let\oldenum=\enumerate
+	\let\endoldenum=\endenumerate
+	\renewenvironment{enumerate}{\oldenum \itemsep1mm \parskip1mm}{\endoldenum}
+
+	% set margin for description
+	\let\olddescr=\description
+	\let\endolddescr=\enddescription
+	\renewenvironment{description}{\olddescr \itemsep1mm \parskip1mm}{\endolddescr}
+
+	% set global margins
+	\setbeamersize{text margin left=8mm,text margin right=5mm}
+	\def\beamerleftmargin{8mm}
+}
+
+\ifdefined\titlesize\else
+	\def\titlesize{14}
+\fi
+\ifdefined\subtitlesize\else
+	\def\subtitlesize{10}
+\fi
+
+
+\ifdefined\footercontent\else %set default footercontent
+\def\footercontent{
+    \ifthenelse{\equal{\insertsection}{\empty}}%
+    {\begin{tabular}{c|c|c}
+        \insertshortauthor & \insertdate & \insertshorttitle 
+    \end{tabular}}
+    {\begin{tabular}{c|c|c|c}
+        \insertshortauthor & \insertdate & \insertshorttitle & \insertsection
+    \end{tabular}}
+}
+\fi
+
+
+\ifdefined\Umathchardef
+	% If XeLaTeX or LuaTeX, setup fontspec
+	% First try Arial, then Helvetica and TeX Gyre Heros, last fallback option is Liberation Sans
+	\usepackage{fontspec}
+	\IfFontExistsTF{Arial} {
+		\setsansfont[
+			Ligatures=TeX,
+			Scale=\fontscale,
+			BoldFont={Arial Bold},
+			ItalicFont={Arial Italic},
+			BoldItalicFont={Arial Bold Italic}
+		]{Arial}
+	}{
+		\IfFontExistsTF{Helvetica} {
+			\setsansfont[
+				Ligatures=TeX,
+				Scale=\fontscale,
+				BoldFont={Helvetica Bold},
+				ItalicFont={Helvetica Italic},
+				BoldItalicFont={Helvetica Bold Italic}
+			]{Helvetica}
+		}{
+			\IfFontExistsTF{TeX Gyre Heros} {
+				\setsansfont[
+					Ligatures=TeX,
+					Scale=\fontscale,
+					BoldFont={TeX Gyre Heros Bold},
+					ItalicFont={TeX Gyre Heros Italic},
+					BoldItalicFont={TeX Gyre Heros Bold Italic}
+				]{TeX Gyre Heros}
+			}{
+				\setsansfont[
+					Ligatures=TeX,
+					Scale=\fontscale,
+					BoldFont={Liberation Sans Bold},
+					ItalicFont={Liberation Sans Italic},
+					BoldItalicFont={Liberation Sans Bold Italic}
+				]{Liberation Sans}
+			}
+		}
+	}
+\else
+	% if fontspec is not available, include the font packages accordingly
+	\usepackage[T1]{fontenc}
+	% Only use arial if installed, else fall back to hevetica
+	\IfFileExists{uarial.sty}{
+		\RequirePackage[scaled=\fontscale]{uarial}
+	}{
+		\RequirePackage[scaled=\fontscale]{helvet}
+	}
+\fi
+
+% Define picture placement on first and last frame (not intended to be used manually)
+\newcommand{\bottompic}[2]{
+	\usebackgroundtemplate{
+		\begin{tikzpicture}[remember picture,overlay]
+			\node[text width=\paperwidth, anchor=south west,inner sep=0pt] (A) at ($(current page.south west)+(-0.2pt,\dimexpr{\footerdp + \footerht + 0.4mm})$) {
+				\includegraphics[width=\bottompicscale\paperwidth]{#1} % Include picture
+			};
+			\node[text width=\paperwidth](B)[above=0 mm of A]{ % Add text above picture
+				\hspace{\beamerleftmargin}\parbox{0.9\textwidth}{
+					\textcolor{TUIl-grey}{\tiny #2}
+  	  	}
+			};
+		\end{tikzpicture}
+	}
+}
+
+% User commands
+% Creates the titlepage (Extra command needed because bottompic needs to be set before creating the frame)
+\renewcommand{\maketitle}{
+        \frame[plain,noframenumbering,c] {
+            \titlepage
+        }
+}
+
+\newcommand{\imageframe}[6][TUIl-orange]{
+	{
+		% Set background picture
+    	\usebackgroundtemplate{
+			\vbox to \paperheight{
+				\vspace{-#6}
+				\hspace{\dimexpr #5 - 0.8mm \relax}
+				\includegraphics[width=#4\paperwidth]{#2}
+			}
+		}
+		% Set color of the title
+		\setbeamercolor{frametitle}{fg=#1}
+
+		% Create frame
+		\frame{
+			\frametitle{#3}
+		}
+	}
+}
+
+\newcommand{\lastframe}[3]{
+	{
+		% Redefine subtitle (unset bfseries)
+		\setbeamerfont{framesubtitle}{size*={9}{11}\selectfont\normalfont}
+		\ifdefined\lastimage
+			\bottompic{\lastimage}{#3}
+		\fi
+
+		% Redefine frame title to have a larger gap between title and subtitle
+		\setbeamertemplate{frametitle}{
+			\vspace{\frametitlev}
+		  \usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}\insertframetitle
+
+		  \vspace{5mm}
+		  \usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\insertframesubtitle
+		}
+
+		% Create frame
+		\frame{
+			\ifdefined\lastimage
+				\frametitle{#1}
+				\framesubtitle{#2}
+			\else
+				\usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}#1
+				\vspace{5mm}
+
+				\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}#2
+			\fi
+		}
+	}
+}
+
+\newcommand{\titlefont}[1]{
+	\textcolor{TUIl-blue}{\textbf{#1}}
+}
+
+% Include other sty files
+\useinnertheme{TUIl}
+\useoutertheme{TUIl}
+\usecolortheme{TUIl}
+
+\mode<all>

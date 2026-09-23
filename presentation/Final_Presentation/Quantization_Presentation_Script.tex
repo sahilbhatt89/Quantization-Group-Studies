@@ -1,0 +1,206 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=19mm,headheight=15pt]{geometry}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{amsmath}
+\usepackage[T1]{fontenc}
+
+\definecolor{TUblue}{HTML}{003B5C}
+\definecolor{TUorange}{HTML}{E95D0F}
+\definecolor{lightblue}{HTML}{EAF1F5}
+\hypersetup{colorlinks=true,linkcolor=TUblue,urlcolor=TUblue}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\setlist[itemize]{leftmargin=5mm,itemsep=1pt,topsep=2pt}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\textcolor{TUblue}{Quantization study / presentation script}}
+\rhead{\textcolor{TUblue}{Sahil Bhatt}}
+\cfoot{\thepage}
+
+\newcommand{\slidetitle}[3]{%
+  \vspace{2mm}\noindent
+  \colorbox{TUblue}{\parbox{\dimexpr\textwidth-2\fboxsep}{\color{white}\bfseries #1\hfill #2}}%
+  \par\textcolor{TUorange}{\bfseries #3}\par
+}
+\newcommand{\cue}[1]{\textit{\textcolor{TUblue}{Presenter cue: #1}}\par}
+\newcommand{\spoken}[1]{#1\par}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries\textcolor{TUorange}{Quantization Study: Updated Presentation Script}}\\[3mm]
+{\large Analysis of Quantization Methods in Transformer-Based Neural Networks}\\[4mm]
+Sahil Bhatt --- Technische Universit\"at Ilmenau\\
+23 September 2026
+\end{center}
+
+\colorbox{lightblue}{\parbox{\dimexpr\textwidth-2\fboxsep}{
+\textbf{Use:} This script follows the current 33-page presentation PDF: the unnumbered cover, Slides 1--31 in the main talk, and Slide 32 as a Q\&A backup. The main script is paced for approximately 20 minutes. Numerical tables should be summarized rather than read cell by cell.
+}}
+
+\textbf{Scientific scope.} The study compares three saved checkpoint--quantizer configurations. It does not isolate architecture as the cause of the observed differences. Both custom methods are post-training and weight-only. Accuracy is evaluated with FP32-reconstructed weights; storage is an estimate of a packed parameter representation.
+
+\textbf{Rehearsal checkpoints.}
+\begin{itemize}
+  \item End of Slide 8, model and quantization introduction: about 5:00.
+  \item End of Slide 17, methodology and baselines: about 10:00.
+  \item End of Slide 23, full-model and storage results: about 14:20.
+  \item End of Slide 28, sensitivity and RQ4: about 18:25.
+  \item Questions: about 20:00.
+\end{itemize}
+
+\slidetitle{COVER / PDF PAGE 1}{00:00--00:25}{Title}
+\cue{Make eye contact, then introduce the study in one sentence.}
+\spoken{Good afternoon. My name is Sahil Bhatt, and I will present my study of post-training weight quantization on ResNet-18, DistilBERT, and ViT-B/16. I compare uniform quantization with a learned scalar codebook, measure accuracy and estimated parameter storage from two to eight bits, and then examine which internal components are most sensitive.}
+
+\slidetitle{SLIDE 1 / PDF PAGE 2}{00:25--01:00}{Research questions and contribution}
+\cue{Indicate the four questions, then the implemented work.}
+\spoken{The study asks how bit width and method affect accuracy and storage, how the three checkpoints respond at four and eight bits, which kernels, tensors, or modules are most sensitive, and whether an eight-bit sensitivity ranking transfers to four bits. I implemented two custom post-training weight quantizers, evaluated forty-two full-model configurations, and ran isolated W4 and W8 sensitivity experiments. I also saved per-example predictions so that the small accuracy changes could be examined with paired statistical tests. These are checkpoint- and pipeline-specific comparisons; the design does not isolate architecture.}
+
+\slidetitle{SLIDE 2 / PDF PAGE 3}{01:00--01:30}{What is a neural network?}
+\cue{Trace the diagram from input through the hidden layer to the prediction.}
+\spoken{A neural network transforms an input into a prediction through layers of weighted connections. Hidden layers build intermediate features, and training adjusts the weights to reduce prediction error. During the experiments, training is already complete. Quantization changes selected stored weights and we measure how those changes affect inference.}
+
+\slidetitle{SLIDE 3 / PDF PAGE 4}{01:30--02:05}{Information flow and quantization}
+\cue{Compare the FP32 and quantized paths.}
+\spoken{In the FP32 path, each layer transforms the activations produced by the previous layer. In the quantized path, selected weights are replaced by low-bit approximations. That perturbation can change intermediate activations and propagate to the final class. A small weight error is not guaranteed to produce a small accuracy change; its effect depends on where it occurs.}
+
+\slidetitle{SLIDE 4 / PDF PAGE 5}{02:05--02:40}{CNN architecture}
+\cue{Point to the filters and then the skip connection.}
+\spoken{A convolutional neural network learns local filters that move across an image. Early layers detect edges and textures, while deeper layers combine them into higher-level features. ResNet-18 adds skip connections around convolutional blocks. Its clearly separated convolution kernels make it useful as the CNN reference for the sensitivity analysis. The first convolution is especially important because every later stage consumes features derived from its output.}
+
+\slidetitle{SLIDE 5 / PDF PAGE 6}{02:40--03:15}{Transformer architecture}
+\cue{Indicate attention and the feed-forward network.}
+\spoken{A transformer represents text tokens or image patches as embeddings with position information. Self-attention lets each token combine information from the others through query, key, and value projections, and a feed-forward network transforms each token afterward. Residual paths and normalization surround these operations. The large embedding and projection matrices are natural weight-quantization targets. This study uses an encoder-only text transformer and an image-patch transformer.}
+
+\slidetitle{SLIDE 6 / PDF PAGE 7}{03:15--03:45}{DistilBERT}
+\cue{Use the sentiment-classification path in the diagram.}
+\spoken{DistilBERT is a compact model distilled from BERT and contains six encoder blocks. The evaluated checkpoint classifies SST-2 sentiment. It reaches 88.42 percent accuracy on all 872 labelled development examples. Because the evaluation set is small, one prediction corresponds to about 0.115 percentage points.}
+
+\slidetitle{SLIDE 7 / PDF PAGE 8}{03:45--04:15}{ViT-B/16}
+\cue{Point from image patches to the class token.}
+\spoken{ViT-B/16 resizes each CIFAR-10 image to the preset input size, divides it into sixteen-by-sixteen patches, projects them into tokens, and processes them with twelve transformer blocks. The class token feeds the classifier. On the full ten-thousand-image CIFAR-10 test set, the checkpoint reaches 95.73 percent. Its pretrained backbone was frozen while the classification head was trained, which is an important confound when comparing it with ResNet.}
+
+\slidetitle{SLIDE 8 / PDF PAGE 9}{04:15--04:45}{What is quantization?}
+\cue{Emphasize the scope statement at the bottom.}
+\spoken{Quantization replaces high-precision values with a smaller set of discrete low-bit values. Fewer bits reduce estimated parameter storage, but rounding can reduce accuracy. Both custom methods here are post-training and weight-only, with no quantization-aware training. Accuracy uses reconstructed FP32 weights and FP32 activations; the packed low-bit storage is estimated separately. Therefore the custom experiments do not demonstrate native low-bit latency, energy savings, or reduced Keras runtime memory.}
+
+\slidetitle{SLIDE 9 / PDF PAGE 10}{04:45--05:10}{Quantization diagram}
+\cue{Point to original weights, then the three-bit grid.}
+\spoken{The blue points represent many possible FP32 weights, while the orange marks represent a much smaller grid. Each weight is projected onto one available value. Lower bit widths give fewer choices and more compression, but usually increase approximation error.}
+
+\slidetitle{SLIDE 10 / PDF PAGE 11}{05:10--05:45}{Uniform PTQ}
+\cue{Explain the operation as divide, round, clip, and reconstruct.}
+\spoken{Uniform post-training quantization places reconstruction levels at equal intervals. A channel-specific scale sets the interval. Each weight is divided by the scale, rounded and clipped to the signed integer range, then multiplied by the scale for evaluation. For example, with scale 0.1, a weight of 0.26 rounds to integer three and reconstructs as 0.3. That difference is the local quantization error. No gradient updates or task retraining occur.}
+
+\slidetitle{SLIDE 11 / PDF PAGE 12}{05:45--06:25}{Uniform PTQ implementation}
+\cue{Follow the implementation diagram from the tensor to evaluation.}
+\spoken{The custom PTQ policy is signed, symmetric, per output channel, and weight-only. For each channel, the scale comes from the largest absolute value. The weights are rounded, clipped, reconstructed, and inserted into a floating-point evaluation model. The sweep repeats from W2 through W8, always starting from the original checkpoint. The symmetric grid has $2^b-1$ levels.}
+
+\slidetitle{SLIDE 12 / PDF PAGE 13}{06:25--07:00}{Scalar codebook quantization}
+\cue{Contrast learned centroids with an evenly spaced grid.}
+\spoken{The second method learns representative values called centroids. Each weight stores the index of its nearest centroid, and reconstruction replaces that index with the centroid value. The centroids can be unevenly spaced and follow the tensor's distribution. This is scalar codebook quantization: one scalar per group, one codebook per tensor, and $2^b$ centroids. The storage estimate includes both the low-bit assignments and the FP32 centroid table.}
+
+\slidetitle{SLIDE 13 / PDF PAGE 14}{07:00--07:40}{Codebook implementation}
+\cue{Trace every arrow from left to right.}
+\spoken{For each selected tensor, the fitting step uses all values up to one hundred thousand, or a uniform sample of one hundred thousand for a larger tensor. It uses fixed-seed k-means++ initialization followed by at most thirty Lloyd updates, with tolerance $10^{-6}$ and one initialization. The seed is forty-two plus the tensor's index. After fitting, nearest-centroid assignment covers every selected value, including values outside the fitting sample. The tensor is then reconstructed in FP32 without retraining, while every unselected weight is copied unchanged.}
+
+\slidetitle{SLIDE 14 / PDF PAGE 15}{07:40--08:25}{Tensor-selection methodology}
+\cue{Point to the three selection counts; do not read path names.}
+\spoken{Both methods use the same selection policy within an experiment. ResNet has twenty-one eligible kernels, DistilBERT forty eligible embedding or kernel tensors, and ViT seventy-six eligible tensors. Biases, normalization scale and offset vectors, and transformer attention biases remain FP32. For sensitivity analysis, ViT's seventy-six tensors are grouped into fourteen logical modules, with seven predefined modules tested at W4. A ViT module can therefore contain several tensors, whereas a ResNet sensitivity run replaces one kernel.}
+
+\slidetitle{SLIDE 15 / PDF PAGE 16}{08:25--09:05}{Checkpoints and datasets}
+\cue{Read the model baselines, then the training-policy row.}
+\spoken{ResNet-18 has 11.19 million parameters and 90.47 percent CIFAR-10 accuracy. DistilBERT has 66.96 million parameters and 88.42 percent SST-2 accuracy. ViT-B/16 has 85.81 million parameters and 95.73 percent CIFAR-10 accuracy. Every quantized result is compared with its own checkpoint; absolute accuracy should not be compared across different tasks. The training procedures also differ: ResNet was adapted end to end, DistilBERT was fine-tuned, and the ViT backbone was frozen.}
+
+\slidetitle{SLIDE 16 / PDF PAGE 17}{09:05--09:45}{Experiment map}
+\cue{Walk through the five stages once.}
+\spoken{Experiment one establishes the FP32 baselines. Experiment two provides framework W8 checks. Experiment three sweeps every selected weight from W2 to W8 for both custom methods. Experiment four replaces one analysis unit at a time to localize sensitivity. Experiment five compares matched W4 and W8 sensitivity ranks and answers the fourth research question. The full sweep measures overall behavior; the isolated runs investigate where that behavior originates. No selective-protection experiment is included in the reported presentation results.}
+
+\slidetitle{SLIDE 17 / PDF PAGE 18}{09:45--10:30}{Baseline checks}
+\cue{Distinguish the framework paths from the custom experiments.}
+\spoken{The framework baselines validate separate eight-bit deployment paths. ResNet uses executable full-integer W8A8 and changes from 90.47 to 88.53 percent. DistilBERT changes from 88.42 to 88.07 percent, and ViT from 95.73 to 95.78 percent, using TensorFlow Lite dynamic-range quantization. Dynamic-range execution is not the same as custom weight-only reconstruction and may quantize supported activations dynamically during inference. These rows are software baselines with different operator policies, not controlled method comparisons.}
+
+\slidetitle{SLIDE 18 / PDF PAGE 19}{10:30--11:05}{Custom PTQ full sweep}
+\cue{Point to W8 and W4; do not read all table cells.}
+\spoken{At eight bits, all three checkpoints remain close to their FP32 baselines: 89.88 percent for ResNet, 88.42 for DistilBERT, and 95.79 for ViT. At four bits, DistilBERT reaches 88.99 percent and ViT 95.23 percent, while ResNet falls to 11.56 percent. The estimated compression at W4 is about 7.9 times for all three. Similar storage estimates therefore produce very different checkpoint-specific accuracy outcomes.}
+
+\slidetitle{SLIDE 19 / PDF PAGE 20}{11:05--11:40}{Scalar codebook full sweep}
+\cue{Highlight DistilBERT W2, ViT W3, and ResNet W4.}
+\spoken{With codebooks, DistilBERT retains 78.33 percent at W2 and ViT retains 89.77 percent at W3. ResNet still collapses at W4, reaching only 8.43 percent, and returns near baseline at W7 and W8. At W8, its 90.25 percent accuracy is slightly closer to baseline than the PTQ result. The results show advantages for selected configurations, not a universal advantage for codebooks.}
+
+\slidetitle{SLIDE 20 / PDF PAGE 21}{11:40--12:15}{Custom PTQ accuracy curves}
+\cue{Trace the three transitions against their dashed baselines.}
+\spoken{The PTQ curves make the thresholds clear. ResNet stays near chance through W4, improves at W5 and W6, and recovers near W7. DistilBERT and ViT are already near baseline at W4. DistilBERT's slight W4 increase equals only five net additional correct predictions, so it is an observed split-specific change rather than evidence of improved generalization.}
+
+\slidetitle{SLIDE 21 / PDF PAGE 22}{12:15--12:55}{Codebook accuracy comparison}
+\cue{Pause on the ViT W3 difference, then state the confound.}
+\spoken{The largest method difference occurs for ViT at W3: codebook accuracy is 89.77 percent, compared with 32.22 percent for uniform PTQ, a difference of 57.55 percentage points. Centroid adaptation is a possible explanation, but the methods also differ in granularity and level count. Codebook uses one tensor-wide set of $2^b$ centroids, while PTQ uses per-channel scales and $2^b-1$ levels.}
+
+\slidetitle{SLIDE 22 / PDF PAGE 23}{12:55--13:30}{Accuracy and storage trade-off}
+\cue{Use the three accuracy plots, then the compact storage table.}
+\spoken{Storage is mainly controlled by bit width: roughly 15.5 to 15.8 times compression at W2, 7.9 times at W4, and 4 times at W8. Compression ratio and memory reduction are mathematically linked by $S=100(1-1/R)$, so they are two views of the same estimate. Values fall slightly below the ideal ratios because scales or codebooks and preserved parameters still use FP32 storage. These figures do not measure latency, energy, or Keras runtime memory.}
+
+\slidetitle{SLIDE 23 / PDF PAGE 24}{13:30--14:10}{Layer-by-layer methodology}
+\cue{Stress that every run resets to the FP32 checkpoint.}
+\spoken{Each isolated run restores the original checkpoint, quantizes exactly one analysis unit, and leaves every other weight in FP32. Sensitivity is baseline accuracy minus modified accuracy. Positive values are losses, while negative values are observed gains on the fixed evaluation split. W8 coverage is exhaustive. ResNet W4 coverage is also exhaustive, while the transformer W4 studies use predefined architectural subsets selected independently of W8 sensitivity. This design localizes individual effects but does not measure interactions among several quantized units.}
+
+\slidetitle{SLIDE 24 / PDF PAGE 25}{14:10--15:05}{ResNet-18 layer sensitivity}
+\cue{Point to the first convolution and explain the wide colour scale.}
+\spoken{The ResNet W4 failure is strongly localized in early kernels. Quantizing the first convolution alone loses 60.65 percentage points with PTQ and 78.62 points with codebook quantization, even though every other weight stays FP32. The next two most sensitive locations are early stack-zero convolutions. At W8, the largest isolated loss is only 0.53 points. The common $\pm80$-point heatmap scale makes smaller effects look pale. This identifies where the failure occurs, but not its cause, and it must not be generalized to all ResNets or CNNs.}
+
+\slidetitle{SLIDE 25 / PDF PAGE 26}{15:05--15:55}{DistilBERT tensor sensitivity}
+\cue{Mention the narrow $\pm0.35$-point scale and the W4 subset.}
+\spoken{The displayed DistilBERT W4 analysis covers fifteen predefined tensors. The three largest codebook losses tie at about 0.229 points, or two net correct predictions, and prediction disagreement orders the tie. Effects are small and distributed across attention and feed-forward tensors. No sampled tensor shows a ResNet-like collapse. The paired McNemar test uses correct-to-wrong and wrong-to-correct changes for the same examples. Nonsignificant results are not evidence of equivalence, because few discordant predictions limit the exact test's resolution on 872 examples.}
+
+\slidetitle{SLIDE 26 / PDF PAGE 27}{15:55--16:40}{ViT-B/16 module sensitivity}
+\cue{Remind the audience that each row is a logical module.}
+\spoken{For ViT, seven predefined modules are tested at W4. Transformer block one has the largest sampled loss, 0.20 percentage points with codebook quantization, followed by much smaller effects in blocks six and three. All sampled changes remain within plus or minus 0.20 points, and none passes the stated false-discovery-rate threshold. The DistilBERT and ViT heatmaps share a $\pm0.35$-point colour scale, but the models use different tasks and analysis units. This supports small measured effects for these tested modules; it does not prove universal transformer robustness.}
+
+\slidetitle{SLIDE 27 / PDF PAGE 28}{16:40--17:35}{Experiment 5: rank stability, RQ4}
+\cue{Define rho, identify the one positive result, then state the boundary.}
+\spoken{This experiment asks whether the W8 sensitivity order predicts the W4 order. Spearman rho measures rank association, using accuracy degradation with prediction disagreement as a tie-breaker. DistilBERT codebook is the only significant positive result: rho is 0.693, the permutation p-value is 0.00551, and the six-test Bonferroni-adjusted value is 0.03306. ViT enumerates all 5,040 possible pairings; the larger matched sets use 199,999 fixed-seed random permutations. Accuracy-only and leave-one-out checks remain positive, so the result is not created only by the tie-breaker or one tensor. The other five tests provide insufficient evidence of transfer, so general W8-to-W4 ranking transfer was not established.}
+
+\slidetitle{SLIDE 28 / PDF PAGE 29}{17:35--18:20}{Observed pattern and interpretation boundary}
+\cue{Say ``custom W8'' for the headline.}
+\spoken{Across the custom W8 configurations, the largest loss is 0.59 percentage points with about four-times estimated compression. At W4, the two transformer checkpoints remain within 0.6 points of baseline with about 7.9-times compression, while ResNet collapses. Codebooks help in selected W2 and W3 transformer configurations. Training history, checkpoint quality, quantizer granularity, and level count all differ together. The results identify an observed pattern and practical breakpoints; the defensible claim concerns these evaluated configurations rather than transformers versus CNNs in general.}
+
+\slidetitle{SLIDE 29 / PDF PAGE 30}{18:20--19:00}{Conclusions}
+\cue{Deliver the practical message without reading the diagram labels.}
+\spoken{The practical conclusion is to choose bit width and quantizer from measurements on the target checkpoint. W8 is the conservative starting point in this study. Lower precision requires a full sweep and sensitivity diagnosis. Layer analysis can nominate candidates for future mixed-precision protection, but no selective-protection result is claimed here. Native low-bit hardware measurements, matched quantizer controls, broader transformer coverage, and causal ResNet ablations remain future work.}
+
+\slidetitle{SLIDE 30 / PDF PAGE 31}{19:00--19:10}{Selected references}
+\cue{Do not read the bibliography.}
+\spoken{These are the main sources for the architectures and quantization foundations. The report contains the complete statistical and transformer-quantization bibliography.}
+
+\slidetitle{SLIDE 31 / PDF PAGE 32}{19:10--20:00}{Questions}
+\cue{Pause, make eye contact, and finish clearly.}
+\spoken{The central message is that compression alone does not determine whether a checkpoint remains useful. Measure its precision breakpoint, inspect sensitive components, and keep the conclusion within the evaluated pipeline. Thank you for your attention. I am happy to take questions.}
+
+\section*{Q\&A backup}
+
+\slidetitle{SLIDE 32 / PDF PAGE 33}{Q\&A ONLY}{BatchNorm hypothesis for the ResNet W4 collapse}
+\cue{Use only if asked about the mechanism.}
+\spoken{The recorded ResNet runs keep the saved FP32 BatchNorm scale, offset, moving mean, and moving variance, and evaluate with \texttt{training=False}. They do not perform folding, recalibration, bias correction, equalization, or adaptive rounding. A mismatch between perturbed early activations and saved statistics is plausible, but it was not isolated or tested. The established result is the location of the failure, especially the first convolution; its causal mechanism remains unresolved.}
+
+\section*{Likely questions and concise answers}
+
+\textbf{Why did ResNet collapse at W4?} The study localizes the problem to early kernels, especially the first convolution. It does not establish a cause. BatchNorm mismatch, checkpoint properties, and other pipeline effects remain hypotheses requiring controlled experiments.
+
+\textbf{Did the custom experiments execute packed low-bit inference?} No. They reconstructed quantized weights as FP32 arrays and evaluated ordinary Keras operations with FP32 activations. Storage was estimated separately for packed assignments or integers, metadata, and preserved FP32 tensors.
+
+\textbf{Why is codebook not simply ``better non-uniform PTQ''?} The compared policies differ in three ways: placement, granularity, and level count. PTQ is uniform per channel with $2^b-1$ levels. Codebook is non-uniform per tensor with $2^b$ centroids. The experiment measures the complete configurations.
+
+\textbf{Do nonsignificant transformer results prove equivalence?} No. Exact McNemar tests have limited resolution when few predictions disagree, especially on 872 SST-2 examples. The study reports small observed effects and absence of detected changes, not statistical equivalence.
+
+\textbf{What does the one significant rank result mean?} Within the tested fifteen-tensor DistilBERT codebook subset, W8 and W4 sensitivity ranks have a positive association. It survives the stated Bonferroni correction and robustness checks, but it does not establish general cross-bit transfer.
+
+\textbf{Why is W4 compression slightly below eight times?} The ideal $32/4=8$ ratio ignores FP32 scales or centroids and unquantized parameters. Including those costs gives approximately $7.9\times$.
+
+\textbf{What should be done next?} Test matched-granularity and matched-level quantizers, extend W4 transformer coverage, evaluate more checkpoints, run controlled ResNet mechanism ablations, and measure actual low-bit latency, memory, throughput, and energy on supported hardware.
+
+\end{document}

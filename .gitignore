@@ -1,0 +1,19 @@
+.venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+artifacts/
+data/sst2/
+
+artifacts/
+data/
+.DS_Store
+
+artifacts/
+data/
+.DS_Store
+
+# Small report-source tables are versioned; evaluation datasets remain ignored.
+!report/data/
+!report/data/*.csv
+!report/data/*.json

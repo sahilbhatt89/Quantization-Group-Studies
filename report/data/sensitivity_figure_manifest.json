@@ -1,0 +1,29 @@
+{
+  "sources": [
+    {
+      "path": "artifacts/resnet18_4bit_layer_sensitivity/layer_sensitivity_w4_vs_w8.csv",
+      "sha256": "1cdc1654d76f814d5a4a1abfb6bbb4ebe864015ffe9ee90530a59c4fef68ce7a"
+    },
+    {
+      "path": "artifacts/distilbert_4bit_stratified_sensitivity/matched_tensor_sensitivity_w4_vs_w8.csv",
+      "sha256": "8551a718052ef9191189dd8ebc7ad85955b0d349bd3834964e81f4c809eb4d8c"
+    },
+    {
+      "path": "artifacts/vit_4bit_stratified_sensitivity/stratified_module_w4_vs_w8.csv",
+      "sha256": "c7204436c96ed422a5e3eb3a8ef204ff0062f98a71d1de9f2212787f2e299a26"
+    }
+  ],
+  "column_order": [
+    "ptq_w4",
+    "ptq_w8",
+    "codebook_w4",
+    "codebook_w8"
+  ],
+  "row_order": "Descending PTQ W4 degradation, then disagreement, using saved ranks",
+  "purpose": "Supporting sensitivity tables and rank validation; no report figures are generated",
+  "report_figures": "notebook_figure_manifest.json",
+  "p_value": "Two-sided absolute Spearman-rho permutation tail; plus-one correction for Monte Carlo",
+  "mcnemar_resolution": "Minimum attainable two-sided exact p is 1 for zero discordances and 2^(1-n) otherwise",
+  "rank_robustness": "DistilBERT codebook: reported ranks, accuracy-only average ties, disagreement-only average ties, and accuracy-only leave-one-out",
+  "inference_rerun": false
+}

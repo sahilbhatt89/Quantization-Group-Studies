@@ -1,0 +1,47 @@
+{
+  "policy": "Unmodified copies of figures saved by notebooks only",
+  "figures": [
+    {
+      "report_image": "report/images/ptq_accuracy_all_models_2_to_8_bit.png",
+      "notebook": "notebooks/25_consolidated_full_model_ptq_codebook_2_to_8_bit_results.ipynb",
+      "plot_cell_index": 15,
+      "artifact": "artifacts/consolidated_full_model_bit_sweeps/ptq_accuracy_all_models_2_to_8_bit.png",
+      "sha256": "2cc0d69045d861ad92c5ab0c9419965fc3be5aad939b2f0e61bb949f71a11dbc"
+    },
+    {
+      "report_image": "report/images/codebook_accuracy_all_models_2_to_8_bit.png",
+      "notebook": "notebooks/25_consolidated_full_model_ptq_codebook_2_to_8_bit_results.ipynb",
+      "plot_cell_index": 15,
+      "artifact": "artifacts/consolidated_full_model_bit_sweeps/codebook_accuracy_all_models_2_to_8_bit.png",
+      "sha256": "7b0f155dd258791ce73b34f0b0b1b6cc2301c1baa66ff6d2a353c1ce193cbed0"
+    },
+    {
+      "report_image": "report/images/all_models_accuracy_compression_2_to_8_bit.png",
+      "notebook": "notebooks/25_consolidated_full_model_ptq_codebook_2_to_8_bit_results.ipynb",
+      "plot_cell_index": 13,
+      "artifact": "artifacts/consolidated_full_model_bit_sweeps/all_models_accuracy_compression_2_to_8_bit.png",
+      "sha256": "db7949a348b5c6a089c1522c4b753b8aeef0a527be27b2bbc60a51b216a7946c"
+    },
+    {
+      "report_image": "report/images/resnet18_w4_w8_layer_sensitivity.png",
+      "notebook": "notebooks/20_resnet18_full_cifar10_4bit_ptq_codebook_layer_sensitivity.ipynb",
+      "plot_cell_index": 34,
+      "artifact": "artifacts/resnet18_4bit_layer_sensitivity/figure6_layer_sensitivity_heatmap_w4_w8.png",
+      "sha256": "a7be2db5a4c608d369075428864c2d24706328dffe4010a8bd0a18624b9f2d3f"
+    },
+    {
+      "report_image": "report/images/distilbert_w4_w8_layer_sensitivity.png",
+      "notebook": "notebooks/21_distilbert_sst2_4bit_stratified_sensitivity_w4_w8.ipynb",
+      "plot_cell_index": 26,
+      "artifact": "artifacts/distilbert_4bit_stratified_sensitivity/figure2_w4_w8_heatmap.png",
+      "sha256": "c7eece9d1bdf0cd69ca62b01bf8ddb1f4060b99f93c1d8c223a90db3e1dfc4b3"
+    },
+    {
+      "report_image": "report/images/vit_w4_w8_module_sensitivity_heatmap.png",
+      "notebook": "notebooks/27_vit_w4_w8_sensitivity_heatmap_from_notebook22.ipynb",
+      "plot_cell_index": 5,
+      "artifact": "artifacts/vit_w4_w8_heatmap/vit_w4_w8_module_sensitivity_heatmap.png",
+      "sha256": "bfe37b10cf2dcc327015c6b081699295c103004b43e4b8a1b70876cbdf664d54"
+    }
+  ]
+}

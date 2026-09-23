@@ -1,0 +1,16 @@
+omitted_tensor,units,accuracy_only_spearman_rho,permutation_p,permutations,test
+transformer_layer_2/feedforward_intermediate_dense/kernel,14,0.658587160509419,0.01248,199999,Monte Carlo
+transformer_layer_0/self_attention_layer/attention_output/kernel,14,0.7149441745343006,0.005505,199999,Monte Carlo
+transformer_layer_2/feedforward_output_dense/kernel,14,0.658587160509419,0.012325,199999,Monte Carlo
+transformer_layer_5/self_attention_layer/query/kernel,14,0.7149441745343006,0.005505,199999,Monte Carlo
+transformer_layer_2/self_attention_layer/value/kernel,14,0.7003686315786222,0.00747,199999,Monte Carlo
+transformer_layer_2/self_attention_layer/query/kernel,14,0.7662991487973365,0.002595,199999,Monte Carlo
+logits/kernel,14,0.7120031014080839,0.0061,199999,Monte Carlo
+token_and_position_embedding/token_embedding/embeddings,14,0.7069889950601398,0.006675,199999,Monte Carlo
+transformer_layer_0/self_attention_layer/query/kernel,14,0.7628361858190709,0.00258,199999,Monte Carlo
+transformer_layer_0/feedforward_output_dense/kernel,14,0.7037342484527523,0.00648,199999,Monte Carlo
+transformer_layer_2/self_attention_layer/attention_output/kernel,14,0.7037342484527523,0.006465,199999,Monte Carlo
+transformer_layer_5/self_attention_layer/attention_output/kernel,14,0.7628361858190709,0.002565,199999,Monte Carlo
+transformer_layer_5/feedforward_output_dense/kernel,14,0.7037342484527523,0.006665,199999,Monte Carlo
+pooled_dense/kernel,14,0.7628361858190709,0.002625,199999,Monte Carlo
+token_and_position_embedding/position_embedding/embeddings,14,0.6447881787925094,0.01655,199999,Monte Carlo

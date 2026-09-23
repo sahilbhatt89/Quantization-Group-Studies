@@ -1,0 +1,38 @@
+{
+  "notebook": "notebooks/21_distilbert_sst2_4bit_stratified_sensitivity_w4_w8.ipynb",
+  "plot_cell_index": 26,
+  "source_csv": "artifacts/distilbert_4bit_stratified_sensitivity/matched_tensor_sensitivity_w4_vs_w8.csv",
+  "source_sha256": "8551a718052ef9191189dd8ebc7ad85955b0d349bd3834964e81f4c809eb4d8c",
+  "figure": "artifacts/distilbert_4bit_stratified_sensitivity/figure2_w4_w8_heatmap.png",
+  "figure_sha256": "c7eece9d1bdf0cd69ca62b01bf8ddb1f4060b99f93c1d8c223a90db3e1dfc4b3",
+  "row_order": [
+    "token_and_position_embedding/token_embedding/embeddings",
+    "token_and_position_embedding/position_embedding/embeddings",
+    "transformer_layer_0/self_attention_layer/query/kernel",
+    "transformer_layer_0/self_attention_layer/attention_output/kernel",
+    "transformer_layer_0/feedforward_output_dense/kernel",
+    "transformer_layer_2/self_attention_layer/query/kernel",
+    "transformer_layer_2/self_attention_layer/value/kernel",
+    "transformer_layer_2/self_attention_layer/attention_output/kernel",
+    "transformer_layer_2/feedforward_intermediate_dense/kernel",
+    "transformer_layer_2/feedforward_output_dense/kernel",
+    "transformer_layer_5/self_attention_layer/query/kernel",
+    "transformer_layer_5/self_attention_layer/attention_output/kernel",
+    "transformer_layer_5/feedforward_output_dense/kernel",
+    "pooled_dense/kernel",
+    "logits/kernel"
+  ],
+  "column_order": [
+    "ptq_w4",
+    "ptq_w8",
+    "codebook_w4",
+    "codebook_w8"
+  ],
+  "color_scale_pp": [
+    -0.35,
+    0.35
+  ],
+  "color_center_pp": 0,
+  "style": "10x9 inch, coolwarm, color-only cells, vertical color bar, 180 dpi",
+  "inference_rerun": false
+}
